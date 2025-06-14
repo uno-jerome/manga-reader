@@ -1,0 +1,4 @@
+--patch-module
+com.mangareader.prototype=_
+--add-reads
+com.mangareader.prototype=ALL-UNNAMED

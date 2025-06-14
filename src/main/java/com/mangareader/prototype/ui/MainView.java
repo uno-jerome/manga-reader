@@ -1,11 +1,18 @@
 package com.mangareader.prototype.ui;
 
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import com.mangareader.prototype.model.Manga;
 import com.mangareader.prototype.model.Chapter;
+import com.mangareader.prototype.model.Manga;
+
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 
 /**
  * Main view for the manga reader application.
@@ -99,7 +106,13 @@ public class MainView extends BorderPane {
 
     private void showMangaReaderView(Chapter chapter) {
         contentArea.getChildren().clear();
-        MangaReaderView mangaReaderView = new MangaReaderView();
+        MangaReaderView mangaReaderView = new MangaReaderView(() -> {
+            // Go back to the manga detail view
+            if (chapter != null && chapter.getMangaId() != null) {
+                // We need to refetch the manga details to go back
+                showLibraryView(); // For now, go back to library
+            }
+        });
         mangaReaderView.loadChapter(chapter);
         contentArea.getChildren().add(mangaReaderView);
     }

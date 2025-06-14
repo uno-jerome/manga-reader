@@ -1,13 +1,25 @@
 package com.mangareader.prototype.ui;
 
-import com.mangareader.prototype.source.MangaSource;
-import com.mangareader.prototype.source.impl.MangaDexSource;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.mangareader.prototype.source.MangaSource;
+import com.mangareader.prototype.source.impl.MangaDexSource;
+
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 public class Sidebar extends VBox {
     private final ListView<String> libraryList;
