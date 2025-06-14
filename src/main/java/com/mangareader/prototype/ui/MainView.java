@@ -11,7 +11,6 @@ import com.mangareader.prototype.service.impl.LibraryServiceImpl;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -78,14 +77,7 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
 
     private ToolBar createTopBar() {
         ToolBar toolBar = new ToolBar();
-
-        // Search field
-        TextField searchField = new TextField();
-        searchField.setPromptText("Search manga...");
-        searchField.setPrefWidth(300);
-
-        toolBar.getItems().add(searchField);
-
+        // Removed search field - search functionality moved to individual views
         return toolBar;
     }
 

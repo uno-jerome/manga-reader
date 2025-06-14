@@ -56,6 +56,12 @@ public class ImageCache {
             return getPlaceholderImage("No+Cover");
         }
 
+        // Validate URL format
+        if (!isValidImageUrl(url)) {
+            System.err.println("Invalid image URL: " + url);
+            return getPlaceholderImage("Invalid+URL");
+        }
+
         return memoryCache.computeIfAbsent(url, this::loadImageWithDiskCache);
     }
 
@@ -142,7 +148,32 @@ public class ImageCache {
             // Check if file exists in disk cache
             if (Files.exists(cachedFile)) {
                 System.out.println("Loading image from disk cache: " + filename);
-                return new Image(new FileInputStream(cachedFile.toFile()));
+
+                // Validate cached file size
+                if (Files.size(cachedFile) < 1024) {
+                    System.err.println("Cached file too small, removing: " + filename);
+                    Files.deleteIfExists(cachedFile);
+                    return downloadAndCacheImage(url, cachedFile);
+                }
+
+                try {
+                    Image cachedImage = new Image(new FileInputStream(cachedFile.toFile()));
+
+                    // Check if cached image is corrupted
+                    if (cachedImage.isError()) {
+                        System.err.println("Cached image is corrupted, re-downloading: " + filename);
+                        Files.deleteIfExists(cachedFile);
+                        Image newImage = downloadAndCacheImage(url, cachedFile);
+                        return newImage != null ? newImage : loadImage(url);
+                    }
+
+                    return cachedImage;
+                } catch (Exception e) {
+                    System.err.println("Error loading cached image, re-downloading: " + e.getMessage());
+                    Files.deleteIfExists(cachedFile);
+                    Image newImage = downloadAndCacheImage(url, cachedFile);
+                    return newImage != null ? newImage : loadImage(url);
+                }
             } else {
                 // Download and cache to disk
                 System.out.println("Downloading and caching image: " + url);
@@ -164,10 +195,32 @@ public class ImageCache {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
 
-            // Load and return image
-            return new Image(new FileInputStream(cachedFile.toFile()));
+            // Validate the downloaded file is not corrupted
+            if (Files.size(cachedFile) < 1024) { // Too small to be a valid image
+                System.err.println("Downloaded file too small, likely corrupted: " + url);
+                Files.deleteIfExists(cachedFile);
+                return null;
+            }
+
+            // Load and test the image
+            Image testImage = new Image(new FileInputStream(cachedFile.toFile()));
+
+            // Check if image loaded successfully
+            if (testImage.isError()) {
+                System.err.println("Downloaded image is corrupted: " + url);
+                Files.deleteIfExists(cachedFile);
+                return null;
+            }
+
+            return testImage;
         } catch (Exception e) {
             System.err.println("Error downloading and caching image: " + e.getMessage());
+            // Clean up corrupted cache file
+            try {
+                Files.deleteIfExists(cachedFile);
+            } catch (IOException cleanupError) {
+                System.err.println("Error cleaning up corrupted cache file: " + cleanupError.getMessage());
+            }
             return null;
         }
     }
@@ -184,6 +237,16 @@ public class ImageCache {
         } catch (NoSuchAlgorithmException e) {
             // Fallback to simple hash
             return String.valueOf(url.hashCode()) + ".jpg";
+        }
+    }
+
+    private boolean isValidImageUrl(String url) {
+        try {
+            URL testUrl = new URL(url);
+            String protocol = testUrl.getProtocol();
+            return "http".equals(protocol) || "https".equals(protocol);
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -206,7 +269,29 @@ public class ImageCache {
     private Image loadImage(String url) {
         try {
             System.out.println("Loading and caching image: " + url);
-            return new Image(url, true); // Load in background
+
+            // Create image with better error handling
+            Image image = new Image(url, 180, 270, true, true, true); // Load in background with error handling
+
+            // Add error listener to handle corruption issues
+            image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
+                if (newEx != null) {
+                    System.err.println("Image loading exception for " + url + ": " + newEx.getMessage());
+                    // Remove from cache if corrupted
+                    memoryCache.remove(url);
+                }
+            });
+
+            // Add error property listener for JPEG corruption
+            image.errorProperty().addListener((obs, wasError, isError) -> {
+                if (isError) {
+                    System.err.println("Image error detected for " + url + " - likely corrupted JPEG data");
+                    // Remove from cache if corrupted
+                    memoryCache.remove(url);
+                }
+            });
+
+            return image;
         } catch (Exception e) {
             System.err.println("Error loading image: " + url + " | " + e.getMessage());
             return new Image("https://via.placeholder.com/180x270?text=Error");

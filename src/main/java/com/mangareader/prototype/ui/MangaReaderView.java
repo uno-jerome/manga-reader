@@ -285,17 +285,38 @@ public class MangaReaderView extends BorderPane {
                         double targetWidth = baseWidth * zoomLevel;
                         pageImageView.setFitWidth(targetWidth);
 
+                        // Create image with better error handling for JPEG corruption
                         Image image = new Image(pageUrl, true);
+
+                        // Add error listeners to handle corrupted JPEG data
+                        image.errorProperty().addListener((obs, wasError, isError) -> {
+                            if (isError) {
+                                System.err
+                                        .println("Error loading manga page image (likely corrupted JPEG): " + pageUrl);
+                                // Set a placeholder image instead
+                                Platform.runLater(() -> {
+                                    Image errorImage = new Image(
+                                            "https://via.placeholder.com/600x800/333333/ffffff?text=Image+Error");
+                                    pageImageView.setImage(errorImage);
+                                });
+                            }
+                        });
+
+                        image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
+                            if (newEx != null) {
+                                System.err.println(
+                                        "Exception loading manga page: " + newEx.getMessage() + " for: " + pageUrl);
+                                Platform.runLater(() -> {
+                                    Image errorImage = new Image(
+                                            "https://via.placeholder.com/600x800/333333/ffffff?text=Load+Failed");
+                                    pageImageView.setImage(errorImage);
+                                });
+                            }
+                        });
+
                         pageImageView.setImage(image);
 
-                        // Add minimal spacing between pages for webtoon reading
-                        if (pageIndex > 0) {
-                            Label spacer = new Label("");
-                            spacer.setStyle("-fx-background-color: #1a1a1a;");
-                            spacer.setPrefHeight(5); // Reduced spacing for webtoon
-                            webtoonContainer.getChildren().add(spacer);
-                        }
-
+                        // For continuous webtoon reading, eliminate gaps between pages
                         webtoonContainer.getChildren().add(pageImageView);
 
                         // Update progress
@@ -379,6 +400,28 @@ public class MangaReaderView extends BorderPane {
 
         String pageUrl = pageUrls.get(currentPageIndex);
         Image image = new Image(pageUrl, true);
+
+        // Add error listeners to handle corrupted JPEG data
+        image.errorProperty().addListener((obs, wasError, isError) -> {
+            if (isError) {
+                System.err.println("Error loading manga page (likely corrupted JPEG): " + pageUrl);
+                Platform.runLater(() -> {
+                    Image errorImage = new Image("https://via.placeholder.com/800x600/333333/ffffff?text=Image+Error");
+                    currentImageView.setImage(errorImage);
+                });
+            }
+        });
+
+        image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
+            if (newEx != null) {
+                System.err.println("Exception loading page: " + newEx.getMessage() + " for: " + pageUrl);
+                Platform.runLater(() -> {
+                    Image errorImage = new Image("https://via.placeholder.com/800x600/333333/ffffff?text=Load+Failed");
+                    currentImageView.setImage(errorImage);
+                });
+            }
+        });
+
         currentImageView.setImage(image);
 
         // Update page info
@@ -533,6 +576,8 @@ public class MangaReaderView extends BorderPane {
     // Chapter navigation methods
     public void setChapterList(List<Chapter> chapters, Chapter currentChapter) {
         this.chapterList = chapters;
+        this.currentChapterIndex = -1; // Reset to invalid index first
+
         if (chapters != null && currentChapter != null) {
             // Find current chapter index
             for (int i = 0; i < chapters.size(); i++) {
@@ -546,32 +591,42 @@ public class MangaReaderView extends BorderPane {
     }
 
     private void updateChapterNavigationButtons() {
-        if (chapterList == null || chapterList.isEmpty()) {
+        // Disable both buttons if no chapter list or invalid index
+        if (chapterList == null || chapterList.isEmpty() || currentChapterIndex < 0) {
             prevChapterButton.setDisable(true);
             nextChapterButton.setDisable(true);
             return;
         }
 
+        // Previous chapter button: disable if at first chapter (index 0)
         prevChapterButton.setDisable(currentChapterIndex <= 0);
+
+        // Next chapter button: disable if at last chapter
         nextChapterButton.setDisable(currentChapterIndex >= chapterList.size() - 1);
     }
 
     private void previousChapter() {
-        if (chapterList != null && currentChapterIndex > 0) {
-            Chapter prevChapter = chapterList.get(currentChapterIndex - 1);
-            loadChapter(prevChapter);
-            currentChapterIndex--;
-            updateChapterNavigationButtons();
+        // Additional safety checks
+        if (chapterList == null || chapterList.isEmpty() || currentChapterIndex <= 0) {
+            return;
         }
+
+        Chapter prevChapter = chapterList.get(currentChapterIndex - 1);
+        this.currentChapterIndex--; // Update index before loading
+        loadChapter(prevChapter);
+        updateChapterNavigationButtons();
     }
 
     private void nextChapter() {
-        if (chapterList != null && currentChapterIndex < chapterList.size() - 1) {
-            Chapter nextChapter = chapterList.get(currentChapterIndex + 1);
-            loadChapter(nextChapter);
-            currentChapterIndex++;
-            updateChapterNavigationButtons();
+        // Additional safety checks
+        if (chapterList == null || chapterList.isEmpty() || currentChapterIndex >= chapterList.size() - 1) {
+            return;
         }
+
+        Chapter nextChapter = chapterList.get(currentChapterIndex + 1);
+        this.currentChapterIndex++; // Update index before loading
+        loadChapter(nextChapter);
+        updateChapterNavigationButtons();
     }
 
     /**

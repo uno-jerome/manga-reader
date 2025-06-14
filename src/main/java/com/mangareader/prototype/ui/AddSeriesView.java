@@ -258,8 +258,9 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
         advancedSearchPane.setVisible(false);
         advancedSearchPane.setManaged(false);
 
-        // Fetch and display default manga list
-        fetchAndDisplayDefaultManga();
+        // Start preloading MangaDex source in background instead of immediately
+        // fetching
+        preloadMangaDexSource();
 
         // Register theme listener after initialization
         themeManager.addThemeChangeListener(this);
@@ -571,6 +572,25 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
             ImageCache imageCache = ImageCache.getInstance();
             if (manga.getCoverUrl() != null && !manga.getCoverUrl().isEmpty()) {
                 Image image = imageCache.getImage(manga.getCoverUrl());
+
+                // Add additional error handling listeners for UI context
+                image.errorProperty().addListener((obs, wasError, isError) -> {
+                    if (isError) {
+                        System.err.println("Image loading error in UI for: " + manga.getCoverUrl());
+                        Image errorImage = imageCache.getPlaceholderImage("Error");
+                        imageView.setImage(errorImage);
+                    }
+                });
+
+                image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
+                    if (newEx != null) {
+                        System.err.println(
+                                "Image exception in UI: " + newEx.getMessage() + " for: " + manga.getCoverUrl());
+                        Image errorImage = imageCache.getPlaceholderImage("Error");
+                        imageView.setImage(errorImage);
+                    }
+                });
+
                 imageView.setImage(image);
             } else {
                 Image placeholderImage = imageCache.getPlaceholderImage("No+Cover");
@@ -634,6 +654,58 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
         });
 
         return box;
+    }
+
+    /**
+     * Preloads MangaDex source data in the background to avoid loading indicators
+     * when the user first opens the AddSeriesView
+     */
+    private void preloadMangaDexSource() {
+        // Show a simple "Ready" message instead of loading indicator
+        mangaGrid.getChildren().clear();
+        Label readyLabel = new Label("Ready to search manga...");
+        readyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #888;");
+        VBox readyBox = new VBox(readyLabel);
+        readyBox.setAlignment(Pos.CENTER);
+        mangaGrid.add(readyBox, 0, 0, columns, 1);
+
+        // Start background preloading
+        new Thread(() -> {
+            try {
+                MangaSource mangaDexSource = sourceSelector.getValue();
+                if (mangaDexSource != null) {
+                    System.out.println("Preloading MangaDex source data...");
+
+                    // Preload default search to warm up the connection and cache
+                    SearchParams preloadParams = new SearchParams();
+                    preloadParams.setQuery("");
+                    preloadParams.setPage(1);
+                    preloadParams.setLimit(20);
+                    preloadParams.setIncludeNsfw(false);
+
+                    // Perform the search in background - this will cache the connection
+                    SearchResult result = mangaDexSource.advancedSearch(preloadParams);
+
+                    Platform.runLater(() -> {
+                        // Update with preloaded content
+                        currentPage = result.getCurrentPage();
+                        totalPages = result.getTotalPages();
+                        pagination.setPageCount(totalPages);
+                        pagination.setCurrentPageIndex(currentPage - 1);
+                        resultsCountLabel.setText(String.format("Found %d results", result.getTotalResults()));
+                        updateMangaGridWithResults(result.getResults());
+
+                        System.out.println("MangaDex source preloaded successfully!");
+                    });
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to preload MangaDex source: " + e.getMessage());
+                Platform.runLater(() -> {
+                    // Fallback to old behavior if preload fails
+                    fetchAndDisplayDefaultManga();
+                });
+            }
+        }).start();
     }
 
     @Override

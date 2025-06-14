@@ -63,7 +63,6 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
 
         scrollPane = new ScrollPane(mangaGrid);
         scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: #f5f5f5;");
 
         // Empty state view
         emptyStateContainer = createEmptyStateView();
@@ -71,6 +70,9 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         // Layout
         setTop(topBar);
         setCenter(scrollPane);
+
+        // Apply initial theme
+        updateComponentThemes();
 
         // Load library content
         loadLibraryContent();
@@ -91,15 +93,8 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filterLibrary(newVal));
 
         statsLabel = new Label("Loading library...");
-        statsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
 
         addSeriesButton = new Button("+ Add New Series");
-        addSeriesButton.setStyle(
-                "-fx-background-color: #007bff; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-padding: 8 16; " +
-                        "-fx-background-radius: 5;");
         addSeriesButton.setOnAction(e -> showAddSeriesView());
 
         HBox leftSection = new HBox(15, new Label("📚 My Library"), statsLabel);
@@ -110,7 +105,6 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
 
         HBox topBar = new HBox();
         topBar.setPadding(new Insets(15, 20, 15, 20));
-        topBar.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;");
 
         HBox.setHgrow(leftSection, Priority.ALWAYS);
         topBar.getChildren().addAll(leftSection, rightSection);
@@ -123,11 +117,11 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         emptyIcon.setStyle("-fx-font-size: 48px;");
 
         Label emptyTitle = new Label("Your Library is Empty");
-        emptyTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        emptyTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
         Label emptyMessage = new Label(
                 "Your personal manga collection will appear here once you start adding series.\nUse the \"+ Add New Series\" button above or navigate to \"Add Series\" to browse and add manga.");
-        emptyMessage.setStyle("-fx-font-size: 16px; -fx-text-fill: #666; -fx-text-alignment: center;");
+        emptyMessage.setStyle("-fx-font-size: 16px; -fx-text-alignment: center;");
         emptyMessage.setWrapText(true);
         emptyMessage.setMaxWidth(400);
 
@@ -227,12 +221,17 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         imageView.setPreserveRatio(false);
 
         StackPane imageContainer = new StackPane(imageView);
-        imageContainer.setStyle(
-                "-fx-background-color: #f0f0f0; " +
-                        "-fx-border-color: #ddd; " +
+
+        // Use theme-aware colors for image container
+        String imageBackgroundColor = themeManager.getSecondaryBackgroundColor();
+        String borderColor = themeManager.getBorderColor();
+        imageContainer.setStyle(String.format(
+                "-fx-background-color: %s; " +
+                        "-fx-border-color: %s; " +
                         "-fx-border-width: 1; " +
                         "-fx-background-radius: 8; " +
-                        "-fx-border-radius: 8;");
+                        "-fx-border-radius: 8;",
+                imageBackgroundColor, borderColor));
 
         // Load cover image using cache
         try {
@@ -250,11 +249,14 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
             imageView.setImage(errorImage);
         }
 
-        // Title and info
+        // Title and info with theme-aware colors
+        String textColor = themeManager.getTextColor();
+        String secondaryTextColor = themeManager.isDarkTheme() ? "#b0b0b0" : "#666666";
+
         Label titleLabel = new Label(manga.getTitle());
         titleLabel.setWrapText(true);
         titleLabel.setMaxWidth(CARD_WIDTH);
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        titleLabel.setStyle(String.format("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: %s;", textColor));
 
         // Progress information with actual data from library service
         String progressText = "Progress: 0/0 chapters";
@@ -295,21 +297,25 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         }
 
         Label progressLabel = new Label(progressText);
-        progressLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
+        progressLabel.setStyle(String.format("-fx-font-size: 11px; -fx-text-fill: %s;", secondaryTextColor));
 
         // Update status label with reading status
         Label statusLabel = new Label(readingStatusText);
-        statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+        statusLabel.setStyle(String.format("-fx-font-size: 12px; -fx-text-fill: %s;", secondaryTextColor));
 
         VBox infoBox = new VBox(5, titleLabel, statusLabel, progressLabel);
         infoBox.setPadding(new Insets(8));
         infoBox.setMaxWidth(CARD_WIDTH);
 
         VBox box = new VBox(0, imageContainer, infoBox);
-        box.setStyle(
-                "-fx-background-color: white; " +
+
+        // Use theme-aware colors for card background
+        String cardBackgroundColor = themeManager.getSecondaryBackgroundColor();
+        box.setStyle(String.format(
+                "-fx-background-color: %s; " +
                         "-fx-background-radius: 8; " +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);");
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);",
+                cardBackgroundColor));
 
         // Click handler
         box.setOnMouseClicked(e -> {
@@ -318,18 +324,20 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
             }
         });
 
-        // Hover effect
-        box.setOnMouseEntered(e -> box.setStyle(
-                "-fx-background-color: white; " +
+        // Hover effect with theme-aware colors
+        box.setOnMouseEntered(e -> box.setStyle(String.format(
+                "-fx-background-color: %s; " +
                         "-fx-background-radius: 8; " +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 12, 0, 0, 4); " +
-                        "-fx-scale-x: 1.05; -fx-scale-y: 1.05;"));
+                        "-fx-scale-x: 1.05; -fx-scale-y: 1.05;",
+                cardBackgroundColor)));
 
-        box.setOnMouseExited(e -> box.setStyle(
-                "-fx-background-color: white; " +
+        box.setOnMouseExited(e -> box.setStyle(String.format(
+                "-fx-background-color: %s; " +
                         "-fx-background-radius: 8; " +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2); " +
-                        "-fx-scale-x: 1.0; -fx-scale-y: 1.0;"));
+                        "-fx-scale-x: 1.0; -fx-scale-y: 1.0;",
+                cardBackgroundColor)));
 
         return box;
     }
@@ -416,6 +424,29 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         String secondaryBackgroundColor = themeManager.getSecondaryBackgroundColor();
         String borderColor = themeManager.getBorderColor();
 
+        // Update top bar styling
+        HBox topBar = (HBox) getTop();
+        if (topBar != null) {
+            topBar.setStyle(String.format(
+                    "-fx-background-color: %s; " +
+                            "-fx-border-color: %s; " +
+                            "-fx-border-width: 0 0 1 0;",
+                    secondaryBackgroundColor, borderColor));
+
+            // Update "My Library" label in the top bar
+            topBar.getChildren().forEach(child -> {
+                if (child instanceof HBox) {
+                    HBox section = (HBox) child;
+                    section.getChildren().forEach(sectionChild -> {
+                        if (sectionChild instanceof Label) {
+                            Label label = (Label) sectionChild;
+                            label.setStyle("-fx-text-fill: " + textColor + ";");
+                        }
+                    });
+                }
+            });
+        }
+
         // Update search field
         if (searchField != null) {
             searchField.setStyle(String.format(
@@ -425,7 +456,7 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
                             "-fx-border-width: 1px; " +
                             "-fx-background-radius: 4px; " +
                             "-fx-border-radius: 4px;",
-                    secondaryBackgroundColor, textColor, borderColor));
+                    backgroundColor, textColor, borderColor));
         }
 
         // Update stats label
@@ -453,9 +484,26 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
                     backgroundColor, borderColor));
         }
 
-        // Update empty state container
+        // Update empty state container and its children
         if (emptyStateContainer != null) {
             emptyStateContainer.setStyle("-fx-background-color: " + backgroundColor + ";");
+
+            // Update empty state text colors
+            emptyStateContainer.getChildren().forEach(child -> {
+                if (child instanceof Label) {
+                    Label label = (Label) child;
+                    String currentStyle = label.getStyle();
+
+                    // Remove any existing text-fill and add the new one
+                    String newStyle = currentStyle.replaceAll("-fx-text-fill: [^;]+;", "")
+                            .trim();
+                    if (!newStyle.isEmpty() && !newStyle.endsWith(";")) {
+                        newStyle += ";";
+                    }
+                    newStyle += " -fx-text-fill: " + textColor + ";";
+                    label.setStyle(newStyle);
+                }
+            });
         }
     }
 
@@ -468,7 +516,30 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
         mangaGrid.getChildren().forEach(node -> {
             if (node instanceof VBox) {
                 VBox card = (VBox) node;
-                // Update the card's image container styling
+
+                // Update the main card background color
+                card.setStyle(String.format(
+                        "-fx-background-color: %s; " +
+                                "-fx-background-radius: 8; " +
+                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);",
+                        cardBackgroundColor));
+
+                // Update hover effects by resetting the event handlers
+                card.setOnMouseEntered(e -> card.setStyle(String.format(
+                        "-fx-background-color: %s; " +
+                                "-fx-background-radius: 8; " +
+                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 12, 0, 0, 4); " +
+                                "-fx-scale-x: 1.05; -fx-scale-y: 1.05;",
+                        cardBackgroundColor)));
+
+                card.setOnMouseExited(e -> card.setStyle(String.format(
+                        "-fx-background-color: %s; " +
+                                "-fx-background-radius: 8; " +
+                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2); " +
+                                "-fx-scale-x: 1.0; -fx-scale-y: 1.0;",
+                        cardBackgroundColor)));
+
+                // Update the card's child components
                 card.getChildren().forEach(child -> {
                     if (child instanceof StackPane) {
                         StackPane imageContainer = (StackPane) child;

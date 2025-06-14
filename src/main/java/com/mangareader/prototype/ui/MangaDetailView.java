@@ -53,7 +53,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-public class MangaDetailView extends BorderPane {
+public class MangaDetailView extends BorderPane implements ThemeManager.ThemeChangeListener {
     // UI Components
     private final ImageView coverImageView;
     private final Label titleLabel;
@@ -93,6 +93,7 @@ public class MangaDetailView extends BorderPane {
     private final int CHAPTERS_PER_PAGE = 50;
     private int currentChapterPage = 0;
     private boolean updatingPagination = false; // Flag to prevent recursive pagination updates
+    private final ThemeManager themeManager;
 
     public MangaDetailView() {
         this(null, null);
@@ -106,9 +107,9 @@ public class MangaDetailView extends BorderPane {
         this.onChapterSelectedCallback = onChapterSelectedCallback;
         this.onBackCallback = onBackCallback;
         this.mangaService = new DefaultMangaServiceImpl();
+        this.themeManager = ThemeManager.getInstance();
 
         setPadding(new Insets(20));
-        setStyle("-fx-background-color: #f9f9f9;");
 
         // Cover Image
         coverImageView = new ImageView();
@@ -141,29 +142,16 @@ public class MangaDetailView extends BorderPane {
         artistLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         statusLabel = new Label();
-        statusLabel.setStyle(
-                "-fx-font-size: 14px; -fx-padding: 5 10; -fx-background-radius: 15; -fx-background-color: #e7f3ff; -fx-text-fill: #0066cc;");
 
         languageLabel = new Label();
-        languageLabel.setStyle(
-                "-fx-font-size: 14px; -fx-padding: 5 10; -fx-background-radius: 15; -fx-background-color: #e7f3ff; -fx-text-fill: #0066cc;");
 
         lastUpdatedLabel = new Label();
-        lastUpdatedLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
 
         // Description Area with better styling
         descriptionArea = new TextArea();
         descriptionArea.setEditable(false);
         descriptionArea.setWrapText(true);
         descriptionArea.setPrefRowCount(8);
-        descriptionArea.setStyle(
-                "-fx-control-inner-background: #f8f9fa; " +
-                        "-fx-background-color: #f8f9fa; " +
-                        "-fx-border-color: #dee2e6; " +
-                        "-fx-border-radius: 5; " +
-                        "-fx-background-radius: 5; " +
-                        "-fx-focus-color: transparent; " +
-                        "-fx-faint-focus-color: transparent;");
 
         // Genres Pane with improved styling
         genresPane = new FlowPane();
@@ -177,11 +165,6 @@ public class MangaDetailView extends BorderPane {
         statsGrid.setHgap(15);
         statsGrid.setVgap(10);
         statsGrid.setPadding(new Insets(15));
-        statsGrid.setStyle(
-                "-fx-background-color: #f0f0f0; " +
-                        "-fx-border-color: #dee2e6; " +
-                        "-fx-border-radius: 5; " +
-                        "-fx-background-radius: 5;");
 
         // Initialize stats labels
         String[] statsKeys = { "Rating", "Users", "Follows", "Popularity", "Release Year", "Chapter Count" };
@@ -199,49 +182,23 @@ public class MangaDetailView extends BorderPane {
         // Read progress
         readProgressBar = new ProgressBar(0);
         readProgressBar.setPrefWidth(200);
-        readProgressBar.setStyle("-fx-accent: #28a745;");
 
         readProgressLabel = new Label("0 / 0 chapters read");
-        readProgressLabel.setStyle("-fx-font-size: 14px;");
 
         VBox progressBox = new VBox(5, new Label("Reading Progress"), readProgressBar, readProgressLabel);
         progressBox.setPadding(new Insets(15, 0, 15, 0));
 
         // Enhanced Buttons with icons
         readButton = new Button("Start Reading");
-        readButton.setStyle(
-                "-fx-font-size: 14px; " +
-                        "-fx-background-color: #007bff; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-padding: 10 20; " +
-                        "-fx-background-radius: 5;");
         readButton.setPrefWidth(150);
 
         downloadButton = new Button("Download");
-        downloadButton.setStyle(
-                "-fx-font-size: 14px; " +
-                        "-fx-background-color: #28a745; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-padding: 10 20; " +
-                        "-fx-background-radius: 5;");
         downloadButton.setPrefWidth(150);
 
         addToLibraryButton = new Button("Add to Library");
-        addToLibraryButton.setStyle(
-                "-fx-font-size: 14px; " +
-                        "-fx-background-color: #6c757d; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-padding: 10 20; " +
-                        "-fx-background-radius: 5;");
         addToLibraryButton.setPrefWidth(150);
 
         refreshButton = new Button("Refresh");
-        refreshButton.setStyle(
-                "-fx-font-size: 14px; " +
-                        "-fx-background-color: #17a2b8; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-padding: 10 20; " +
-                        "-fx-background-radius: 5;");
         refreshButton.setPrefWidth(150);
 
         // Buttons layout
@@ -267,9 +224,10 @@ public class MangaDetailView extends BorderPane {
                     if (item == null || empty) {
                         setStyle("");
                     } else {
-                        // Add styling for read/unread chapters
+                        // Theme-aware styling for read/unread chapters
                         setStyle("-fx-background-color: transparent;");
-                        setOnMouseEntered(e -> setStyle("-fx-background-color: #f8f9fa;"));
+                        String hoverColor = themeManager.isDarkTheme() ? "#3c3c3c" : "#f8f9fa";
+                        setOnMouseEntered(e -> setStyle("-fx-background-color: " + hoverColor + ";"));
                         setOnMouseExited(e -> setStyle("-fx-background-color: transparent;"));
                     }
                 }
@@ -460,7 +418,8 @@ public class MangaDetailView extends BorderPane {
                     });
                 });
             } else if (newTab != null && newTab == gridTab) {
-                // When switching to Grid tab, reset its scroll position to prevent contamination
+                // When switching to Grid tab, reset its scroll position to prevent
+                // contamination
                 System.out.println("DEBUG: Switching to Grid tab - resetting grid scroll state");
                 Platform.runLater(() -> {
                     // Reset GRID scroll pane position to top
@@ -554,6 +513,9 @@ public class MangaDetailView extends BorderPane {
 
         // Initial sort order is newest first
         sortChapters("Newest First");
+
+        // Register for theme changes after construction is complete
+        themeManager.addThemeChangeListener(this);
     }
 
     // Create the chapter grid view
@@ -585,9 +547,13 @@ public class MangaDetailView extends BorderPane {
             VBox chapterBox = new VBox(5);
             chapterBox.setPadding(new Insets(10));
             chapterBox.setAlignment(Pos.CENTER);
+
+            // Theme-aware styling for chapter cards
+            String cardBg = themeManager.isDarkTheme() ? "#3c3c3c" : "white";
+            String borderColor = themeManager.isDarkTheme() ? "#555555" : "#dee2e6";
             chapterBox.setStyle(
-                    "-fx-background-color: white; " +
-                            "-fx-border-color: #dee2e6; " +
+                    "-fx-background-color: " + cardBg + "; " +
+                            "-fx-border-color: " + borderColor + "; " +
                             "-fx-border-radius: 8; " +
                             "-fx-background-radius: 8; " +
                             "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);");
@@ -596,7 +562,8 @@ public class MangaDetailView extends BorderPane {
             chapterNumLabel.setStyle("-fx-font-weight: bold;");
 
             Label volumeLabel = new Label(chapter.getVolume() != null ? "Vol. " + chapter.getVolume() : "");
-            volumeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+            String volumeTextColor = themeManager.isDarkTheme() ? "#a0a0a0" : "#666";
+            volumeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: " + volumeTextColor + ";");
 
             // Read status indicator
             Circle readStatusIndicator = new Circle(5);
@@ -611,9 +578,7 @@ public class MangaDetailView extends BorderPane {
             statusBox.setAlignment(Pos.CENTER);
 
             Button chapterReadButton = new Button("Read");
-            chapterReadButton.setStyle(
-                    "-fx-background-color: #007bff; " +
-                            "-fx-text-fill: white;");
+            chapterReadButton.getStyleClass().add("primary");
 
             chapterReadButton.setOnAction(e -> {
                 if (onChapterSelectedCallback != null) {
@@ -739,7 +704,8 @@ public class MangaDetailView extends BorderPane {
                 updatingPagination = false;
             }
 
-            // NUCLEAR OPTION: Completely reset table state and force recreation of virtual flow
+            // NUCLEAR OPTION: Completely reset table state and force recreation of virtual
+            // flow
             chaptersTable.setItems(FXCollections.observableArrayList()); // Replace with empty list
             chaptersTable.refresh();
 
@@ -1024,15 +990,36 @@ public class MangaDetailView extends BorderPane {
 
         try {
             Image image = new Image(manga.getCoverUrl(), 250, 350, true, true, true);
-            
+
             image.errorProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal) {
+                    System.err.println("Error loading cover image (likely corrupted JPEG): " + manga.getCoverUrl());
                     // Error loading image, use placeholder
                     String placeholderUrl = "https://via.placeholder.com/250x350/f8f9fa/6c757d?text=No+Cover";
+                    Image placeholderImage = new Image(placeholderUrl, true);
+
+                    // Add error handling for placeholder too
+                    placeholderImage.errorProperty().addListener((pObs, pOldVal, pNewVal) -> {
+                        if (pNewVal) {
+                            System.err.println("Error loading placeholder image, using fallback");
+                            Platform.runLater(() -> coverImageView.setImage(null));
+                        }
+                    });
+
+                    coverImageView.setImage(placeholderImage);
+                }
+            });
+
+            // Add exception listener for better error handling
+            image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
+                if (newEx != null) {
+                    System.err.println(
+                            "Exception loading cover image: " + newEx.getMessage() + " for: " + manga.getCoverUrl());
+                    String placeholderUrl = "https://via.placeholder.com/250x350/f8f9fa/6c757d?text=Load+Error";
                     coverImageView.setImage(new Image(placeholderUrl, true));
                 }
             });
-            
+
             image.progressProperty().addListener((obs, oldProgress, newProgress) -> {
                 if (newProgress.doubleValue() >= 1.0) {
                     // Image loaded successfully
@@ -1056,7 +1043,8 @@ public class MangaDetailView extends BorderPane {
         languageLabel.setText(manga.getLanguage() != null ? manga.getLanguage() : "Unknown");
 
         if (manga.getLastUpdated() != null) {
-            lastUpdatedLabel.setText("Updated: " + manga.getLastUpdated().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+            lastUpdatedLabel
+                    .setText("Updated: " + manga.getLastUpdated().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
         }
 
         descriptionArea.setText(manga.getDescription());
@@ -1069,9 +1057,12 @@ public class MangaDetailView extends BorderPane {
         if (manga.getGenres() != null) {
             for (String genre : manga.getGenres()) {
                 Label genreLabel = new Label(genre);
+                // Apply theme-aware styling for genre labels
+                String genreBg = themeManager.isDarkTheme() ? "#4a4a4a" : "#e7f3ff";
+                String genreText = themeManager.isDarkTheme() ? "#87ceeb" : "#0066cc";
                 genreLabel.setStyle(
-                        "-fx-background-color: #e7f3ff; " +
-                                "-fx-text-fill: #0066cc; " +
+                        "-fx-background-color: " + genreBg + "; " +
+                                "-fx-text-fill: " + genreText + "; " +
                                 "-fx-padding: 5 10; " +
                                 "-fx-background-radius: 15; " +
                                 "-fx-font-size: 12px;");
@@ -1151,5 +1142,94 @@ public class MangaDetailView extends BorderPane {
 
     public Button getRefreshButton() {
         return refreshButton;
+    }
+
+    /**
+     * Apply the current theme to all components
+     */
+    private void applyTheme() {
+        // Apply main background
+        setStyle("-fx-background-color: " + themeManager.getBackgroundColor() + ";");
+
+        // Apply theme to stats grid
+        String statsGridBg = themeManager.isDarkTheme() ? "#3c3c3c" : "#f0f0f0";
+        String borderColor = themeManager.getBorderColor();
+        statsGrid.setStyle(
+                "-fx-background-color: " + statsGridBg + "; " +
+                        "-fx-border-color: " + borderColor + "; " +
+                        "-fx-border-radius: 5; " +
+                        "-fx-background-radius: 5;");
+
+        // Apply theme to description area
+        String descBg = themeManager.isDarkTheme() ? "#3c3c3c" : "#f8f9fa";
+        descriptionArea.setStyle(
+                "-fx-control-inner-background: " + descBg + "; " +
+                        "-fx-background-color: " + descBg + "; " +
+                        "-fx-border-color: " + borderColor + "; " +
+                        "-fx-border-radius: 5; " +
+                        "-fx-background-radius: 5; " +
+                        "-fx-focus-color: transparent; " +
+                        "-fx-faint-focus-color: transparent;");
+
+        // Apply theme to buttons
+        readButton.getStyleClass().removeAll("primary", "success", "warning");
+        readButton.getStyleClass().add("primary");
+
+        downloadButton.getStyleClass().removeAll("primary", "success", "warning");
+        downloadButton.getStyleClass().add("success");
+
+        addToLibraryButton.getStyleClass().removeAll("primary", "success", "warning");
+
+        refreshButton.getStyleClass().removeAll("primary", "success", "warning");
+
+        // Apply theme to status and language labels
+        String labelBg = themeManager.isDarkTheme() ? "#4a4a4a" : "#e7f3ff";
+        String labelText = themeManager.isDarkTheme() ? "#87ceeb" : "#0066cc";
+        statusLabel.setStyle(
+                "-fx-font-size: 14px; -fx-padding: 5 10; -fx-background-radius: 15; " +
+                        "-fx-background-color: " + labelBg + "; -fx-text-fill: " + labelText + ";");
+        languageLabel.setStyle(
+                "-fx-font-size: 14px; -fx-padding: 5 10; -fx-background-radius: 15; " +
+                        "-fx-background-color: " + labelBg + "; -fx-text-fill: " + labelText + ";");
+
+        // Apply theme to last updated label
+        lastUpdatedLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: " + themeManager.getTextColor() + ";");
+
+        // Apply theme to progress bar
+        String progressColor = themeManager.isDarkTheme() ? "#28a745" : "#28a745";
+        readProgressBar.setStyle("-fx-accent: " + progressColor + ";");
+
+        // Update existing genre labels
+        updateGenreLabels();
+    }
+
+    private void updateGenreLabels() {
+        String genreBg = themeManager.isDarkTheme() ? "#4a4a4a" : "#e7f3ff";
+        String genreText = themeManager.isDarkTheme() ? "#87ceeb" : "#0066cc";
+
+        genresPane.getChildren().forEach(node -> {
+            if (node instanceof Label genreLabel) {
+                genreLabel.setStyle(
+                        "-fx-background-color: " + genreBg + "; " +
+                                "-fx-text-fill: " + genreText + "; " +
+                                "-fx-padding: 5 10; " +
+                                "-fx-background-radius: 15; " +
+                                "-fx-font-size: 12px;");
+            }
+        });
+    }
+
+    @Override
+    public void onThemeChanged(ThemeManager.Theme newTheme) {
+        Platform.runLater(() -> {
+            applyTheme();
+
+            // Update any existing chapter grid cards
+            Tab gridTab = chaptersTabPane.getTabs().get(1);
+            ScrollPane gridScrollPane = (ScrollPane) gridTab.getContent();
+            if (gridScrollPane.getContent() instanceof GridPane gridPane) {
+                updateChapterGrid(gridPane, sortedChapters);
+            }
+        });
     }
 }

@@ -7,6 +7,7 @@ import com.mangareader.prototype.model.Manga;
 import com.mangareader.prototype.service.MangaService;
 import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ButtonBar;
@@ -76,7 +77,26 @@ public class AddSeriesModal extends Dialog<Manga> {
 
         // Always set a placeholder first
         String placeholderUrl = "https://via.placeholder.com/200x300/f8f9fa/6c757d?text=No+Cover";
-        coverImageView.setImage(new Image(placeholderUrl, true));
+        Image placeholderImage = new Image(placeholderUrl, true);
+
+        // Add error handling even for placeholder images
+        placeholderImage.errorProperty().addListener((obs, wasError, isError) -> {
+            if (isError) {
+                System.err.println("Error loading placeholder image, using fallback");
+                // Use a simple fallback if even placeholder fails
+                Platform.runLater(() -> {
+                    try {
+                        Image fallbackImage = new Image(
+                                "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIENvdmVyPC90ZXh0Pjwvc3ZnPg==");
+                        coverImageView.setImage(fallbackImage);
+                    } catch (Exception e) {
+                        System.err.println("All image loading failed: " + e.getMessage());
+                    }
+                });
+            }
+        });
+
+        coverImageView.setImage(placeholderImage);
 
         // Load cover image if available
         loadCoverImage(manga);

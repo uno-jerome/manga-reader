@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -259,6 +261,7 @@ public class LibraryServiceImpl implements LibraryService {
     /**
      * Library entry wrapper to store additional metadata
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LibraryEntry {
         private Manga manga;
         private LocalDateTime addedDate;
@@ -386,6 +389,7 @@ public class LibraryServiceImpl implements LibraryService {
             }
         }
 
+        @JsonIgnore
         public double getProgressPercentage() {
             return totalChapters > 0 ? (double) chaptersRead / totalChapters : 0.0;
         }
