@@ -1,6 +1,6 @@
 # MangaReader 📚
 
-A modern, cross-platform manga reader application built with JavaFX that provides a seamless reading experience with support for multiple manga sources.
+Final Project Requirement
 
 [![Java Version](https://img.shields.io/badge/Java-17%2B-orange.svg)](https://www.oracle.com/java/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-21.0.2-blue.svg)](https://openjfx.io/)
@@ -220,30 +220,16 @@ We welcome contributions! Please follow these steps:
 ## 🗺️ Roadmap
 
 - [ ] **v1.1**: Complete download functionality
-- [ ] **v1.2**: Additional manga sources (Mangakakalot, etc.)
-- [ ] **v1.3**: Reading statistics and analytics
-- [ ] **v1.4**: Cloud library synchronization
-- [ ] **v2.0**: Mobile companion app
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- **MangaDx** - For providing free manga API
-- **JavaFX Community** - For excellent UI framework
-- **Contributors** - Everyone who helps improve this project
-
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/manga-reader/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/manga-reader/discussions)
-- **Wiki**: [Project Wiki](https://github.com/yourusername/manga-reader/wiki)
+- **Issues**: [GitHub Issues](https://github.com/uno-jerome/manga-reader/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/uno-jerome/manga-reader/discussions) // NOT WORKING!!
+- **Wiki**: [Project Wiki](https://github.com/uno-jerome/manga-reader/wiki) // NOT WORKING!!
 
 ---
 
-<div align="center">
-  <p>Made with ❤️ for manga lovers</p>
-  <p>⭐ Star this repo if you find it helpful!</p>
-</div>
