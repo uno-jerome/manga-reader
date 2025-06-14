@@ -230,6 +230,17 @@ public class AddSeriesView extends VBox {
             performAdvancedSearch();
         });
 
+        // Add Enter key support for search field
+        searchField.setOnAction(e -> {
+            String query = searchField.getText().trim();
+            searchParams.setQuery(query);
+            searchParams.setPage(1);
+            searchParams.setLimit(itemsPerPage);
+            currentPage = 1;
+            pagination.setCurrentPageIndex(0);
+            performAdvancedSearch();
+        });
+
         // Add all components to main layout
         VBox contentBox = new VBox(10,
                 searchBox,

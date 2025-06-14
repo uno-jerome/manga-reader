@@ -16,10 +16,12 @@ public class Manga {
     private LocalDateTime lastUpdated;
     private List<Chapter> chapters;
     private String language;
+    private String readingFormat; // "normal" or "webtoon"
 
     public Manga() {
         this.genres = new ArrayList<>();
         this.chapters = new ArrayList<>();
+        this.readingFormat = "normal"; // Default to normal reading mode
     }
 
     public String getId() {
@@ -108,5 +110,13 @@ public class Manga {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getReadingFormat() {
+        return readingFormat;
+    }
+
+    public void setReadingFormat(String readingFormat) {
+        this.readingFormat = readingFormat;
     }
 }

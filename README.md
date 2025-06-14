@@ -10,11 +10,15 @@ Final Project Requirement
 ## ✨ Features
 
 - **📖 Clean Reading Interface**: Intuitive and modern UI designed for comfortable manga reading
+- **📜 Webtoon Support**: Automatic detection and optimized reading mode for Korean manhwa and webtoons
+- **🔄 Reading Mode Toggle**: Switch between traditional page-by-page and continuous scroll webtoon modes
 - **🔍 Powerful Search**: Advanced search with filters for genres, status, and content rating
 - **📚 Library Management**: Add manga to your personal library and track reading progress
-- **🌐 Multiple Sources**: Currently supports MangaDx with extensible architecture for additional sources
+- **🌐 Multiple Sources**: Currently supports MangaDex with extensible architecture for additional sources
 - **⬇️ Download Support**: Download chapters for offline reading
 - **🎯 Chapter Navigation**: Easy chapter browsing with multiple view modes (list, grid, volumes)
+- **⌨️ Keyboard Navigation**: Full keyboard support (Arrow keys, A/D, +/-, 0, Escape)
+- **🔍 Zoom Controls**: Image zoom with slider and auto-fit functionality
 - **🎨 Modern UI**: Clean, responsive interface with dark/light theme support
 - **📱 Cross-Platform**: Runs on Windows, macOS, and Linux
 
@@ -109,7 +113,15 @@ manga-reader/
 1. **Browse Library**: View your collected manga in the library
 2. **Select Manga**: Click on any manga to view details and chapters
 3. **Start Reading**: Click "Start Reading" or select a specific chapter
-4. **Navigation**: Use scroll or keyboard arrows to navigate pages
+4. **Reading Modes**: 
+   - **Traditional Mode**: Page-by-page navigation for standard manga
+   - **Webtoon Mode**: Continuous scrolling for Korean manhwa and long-strip comics
+   - **Auto-Detection**: Reading format is automatically detected based on genre tags
+5. **Navigation**: 
+   - Use scroll, keyboard arrows (←/→), or A/D keys to navigate pages
+   - Use +/- keys to zoom in/out, 0 to reset zoom
+   - Press Escape to go back to manga details
+6. **Mode Toggle**: Click the reading mode button to switch between Traditional (📖) and Webtoon (📜) modes
 
 ### Library Management
 

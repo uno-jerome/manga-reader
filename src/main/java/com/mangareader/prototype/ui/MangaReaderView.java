@@ -14,6 +14,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,9 +23,12 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 public class MangaReaderView extends BorderPane {
     private final StackPane imageContainer;
+    private final ScrollPane webtoonScrollPane;
+    private final VBox webtoonContainer;
     private final ImageView currentImageView;
     private final ProgressIndicator progressIndicator;
     private final Label errorLabel;
@@ -34,6 +38,7 @@ public class MangaReaderView extends BorderPane {
     private final Button prevChapterButton;
     private final Button nextChapterButton;
     private final Button backButton;
+    private final Button modeToggleButton;
     private final Slider zoomSlider;
     private final HBox controlsBox;
 
@@ -44,7 +49,12 @@ public class MangaReaderView extends BorderPane {
     private List<String> pageUrls;
     private int currentPageIndex = 0;
     private double zoomLevel = 1.0;
+    private boolean isWebtoonMode = false;
     private Runnable onBackCallback;
+
+    // Chapter navigation data
+    private List<Chapter> chapterList;
+    private int currentChapterIndex = -1;
 
     public MangaReaderView() {
         this(null);
@@ -55,11 +65,24 @@ public class MangaReaderView extends BorderPane {
         this.mangaService = new DefaultMangaServiceImpl();
         this.executorService = Executors.newSingleThreadExecutor();
 
-        // Main image container with dark background
+        // Main image container with dark background (for traditional mode)
         imageContainer = new StackPane();
         imageContainer.setStyle("-fx-background-color: #2b2b2b;");
 
-        // Current page image view
+        // Webtoon container setup (for continuous scrolling)
+        webtoonContainer = new VBox();
+        webtoonContainer.setStyle("-fx-background-color: #2b2b2b;");
+        webtoonContainer.setAlignment(Pos.CENTER);
+        webtoonContainer.setSpacing(3); // Minimal spacing for webtoon reading
+
+        webtoonScrollPane = new ScrollPane(webtoonContainer);
+        webtoonScrollPane.setStyle("-fx-background-color: #2b2b2b;");
+        webtoonScrollPane.setFitToWidth(true);
+        webtoonScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        webtoonScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        webtoonScrollPane.setPannable(true); // Allow panning/dragging
+
+        // Current page image view (for traditional mode)
         currentImageView = new ImageView();
         currentImageView.setPreserveRatio(true);
         currentImageView.setSmooth(true);
@@ -92,6 +115,12 @@ public class MangaReaderView extends BorderPane {
             }
         });
 
+        // Mode toggle button
+        modeToggleButton = new Button("📖 Traditional");
+        modeToggleButton.setStyle(
+                "-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 12;");
+        modeToggleButton.setOnAction(e -> toggleReadingMode());
+
         prevButton = new Button("◀ Previous");
         prevButton.setDisable(true);
         prevButton.setOnAction(e -> previousPage());
@@ -104,12 +133,14 @@ public class MangaReaderView extends BorderPane {
         prevChapterButton = new Button("◄◄ Prev Chapter");
         prevChapterButton.setStyle(
                 "-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 6 10;");
-        prevChapterButton.setDisable(true); // Will be enabled when we have chapter list
+        prevChapterButton.setDisable(true);
+        prevChapterButton.setOnAction(e -> previousChapter());
 
         nextChapterButton = new Button("Next Chapter ►►");
         nextChapterButton.setStyle(
                 "-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 6 10;");
-        nextChapterButton.setDisable(true); // Will be enabled when we have chapter list
+        nextChapterButton.setDisable(true);
+        nextChapterButton.setOnAction(e -> nextChapter());
 
         // Zoom slider
         zoomSlider = new Slider(0.1, 3.0, 1.0);
@@ -118,14 +149,22 @@ public class MangaReaderView extends BorderPane {
         zoomSlider.setPrefWidth(200);
         zoomSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             zoomLevel = newVal.doubleValue();
-            updateImageSize();
+            if (isWebtoonMode) {
+                updateWebtoonImageSizes();
+            } else {
+                updateImageSize();
+            }
         });
 
         // Auto-fit button for quick fit-to-window
         Button autoFitButton = new Button("Fit");
         autoFitButton.setOnAction(e -> {
             zoomSlider.setValue(1.0);
-            updateImageSize();
+            if (isWebtoonMode) {
+                updateWebtoonImageSizes();
+            } else {
+                updateImageSize();
+            }
         });
 
         Label zoomLabel = new Label("Zoom:");
@@ -140,6 +179,8 @@ public class MangaReaderView extends BorderPane {
         controlsBox.getChildren().addAll(
                 backButton,
                 new Label("   "), // Spacer
+                modeToggleButton,
+                new Label(" "), // Small spacer
                 prevChapterButton,
                 new Label(" "), // Small spacer
                 prevButton, pageInfoLabel, nextButton,
@@ -171,6 +212,99 @@ public class MangaReaderView extends BorderPane {
         imageContainer.heightProperty().addListener((obs, oldHeight, newHeight) -> {
             Platform.runLater(this::updateImageSize);
         });
+
+        // Listen for webtoon container resize to update webtoon images
+        webtoonScrollPane.widthProperty().addListener((obs, oldWidth, newWidth) -> {
+            if (isWebtoonMode) {
+                Platform.runLater(this::updateWebtoonImageSizes);
+            }
+        });
+    }
+
+    private void toggleReadingMode() {
+        isWebtoonMode = !isWebtoonMode;
+
+        if (isWebtoonMode) {
+            // Switch to webtoon mode
+            modeToggleButton.setText("📜 Webtoon");
+            setCenter(webtoonScrollPane);
+            setupWebtoonView();
+            // In webtoon mode, hide individual page navigation but keep other controls
+            prevButton.setVisible(false);
+            nextButton.setVisible(false);
+            pageInfoLabel.setVisible(false);
+        } else {
+            // Switch to traditional mode
+            modeToggleButton.setText("📖 Traditional");
+            setCenter(imageContainer);
+            displayCurrentPage();
+            // Show page navigation in traditional mode
+            prevButton.setVisible(true);
+            nextButton.setVisible(true);
+            pageInfoLabel.setVisible(true);
+            updateNavigationButtons();
+        }
+    }
+
+    private void setupWebtoonView() {
+        if (pageUrls == null || pageUrls.isEmpty()) {
+            return;
+        }
+
+        webtoonContainer.getChildren().clear();
+        progressIndicator.setVisible(true);
+
+        // Load all images in sequence for continuous scrolling
+        executorService.submit(() -> {
+            try {
+                for (int i = 0; i < pageUrls.size(); i++) {
+                    final int pageIndex = i;
+                    final String pageUrl = pageUrls.get(i);
+
+                    Platform.runLater(() -> {
+                        ImageView pageImageView = new ImageView();
+                        pageImageView.setPreserveRatio(true);
+                        pageImageView.setSmooth(true);
+                        pageImageView.setCache(true);
+
+                        // Set width to fit the container properly for webtoon reading
+                        // Use a larger width for better readability
+                        double containerWidth = webtoonScrollPane.getWidth();
+                        if (containerWidth <= 0) {
+                            containerWidth = getScene() != null ? getScene().getWidth() - 250 : 800;
+                        }
+
+                        // Set the image to use most of the available width, applying zoom level
+                        double baseWidth = Math.max(600, containerWidth * 0.85);
+                        double targetWidth = baseWidth * zoomLevel;
+                        pageImageView.setFitWidth(targetWidth);
+
+                        Image image = new Image(pageUrl, true);
+                        pageImageView.setImage(image);
+
+                        // Add minimal spacing between pages for webtoon reading
+                        if (pageIndex > 0) {
+                            Label spacer = new Label("");
+                            spacer.setStyle("-fx-background-color: #1a1a1a;");
+                            spacer.setPrefHeight(5); // Reduced spacing for webtoon
+                            webtoonContainer.getChildren().add(spacer);
+                        }
+
+                        webtoonContainer.getChildren().add(pageImageView);
+
+                        // Update progress
+                        if (pageIndex == pageUrls.size() - 1) {
+                            progressIndicator.setVisible(false);
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    displayError("Failed to load webtoon pages: " + e.getMessage());
+                    progressIndicator.setVisible(false);
+                });
+            }
+        });
     }
 
     public void loadChapter(Chapter chapter) {
@@ -181,9 +315,24 @@ public class MangaReaderView extends BorderPane {
 
         this.currentChapter = chapter;
         this.currentPageIndex = 0;
+
+        // Auto-detect reading mode based on chapter format
+        if (chapter.getReadingFormat() != null && "webtoon".equals(chapter.getReadingFormat())) {
+            if (!isWebtoonMode) {
+                toggleReadingMode();
+            }
+        } else {
+            if (isWebtoonMode) {
+                toggleReadingMode();
+            }
+        }
+
         progressIndicator.setVisible(true);
         errorLabel.setVisible(false);
         currentImageView.setImage(null);
+
+        // Update chapter navigation buttons
+        updateChapterNavigationButtons();
 
         executorService.submit(() -> {
             try {
@@ -192,8 +341,12 @@ public class MangaReaderView extends BorderPane {
                     this.pageUrls = urls;
                     progressIndicator.setVisible(false);
                     if (urls != null && !urls.isEmpty()) {
-                        displayCurrentPage();
-                        updateNavigationButtons();
+                        if (isWebtoonMode) {
+                            setupWebtoonView();
+                        } else {
+                            displayCurrentPage();
+                            updateNavigationButtons();
+                        }
                     } else {
                         displayError("No pages found for this chapter.");
                     }
@@ -273,6 +426,29 @@ public class MangaReaderView extends BorderPane {
         currentImageView.setFitHeight(imageHeight * scale);
     }
 
+    private void updateWebtoonImageSizes() {
+        if (webtoonContainer == null || webtoonContainer.getChildren().isEmpty()) {
+            return;
+        }
+
+        double containerWidth = webtoonScrollPane.getWidth();
+        if (containerWidth <= 0) {
+            containerWidth = getScene() != null ? getScene().getWidth() - 250 : 800;
+        }
+
+        // Set the image to use most of the available width, applying zoom level
+        double baseWidth = Math.max(600, containerWidth * 0.85);
+        double targetWidth = baseWidth * zoomLevel;
+
+        // Update all webtoon images
+        webtoonContainer.getChildren().forEach(node -> {
+            if (node instanceof ImageView) {
+                ImageView imageView = (ImageView) node;
+                imageView.setFitWidth(targetWidth);
+            }
+        });
+    }
+
     private void previousPage() {
         if (currentPageIndex > 0) {
             currentPageIndex--;
@@ -339,5 +515,49 @@ public class MangaReaderView extends BorderPane {
 
     public int getTotalPages() {
         return pageUrls != null ? pageUrls.size() : 0;
+    }
+
+    // Chapter navigation methods
+    public void setChapterList(List<Chapter> chapters, Chapter currentChapter) {
+        this.chapterList = chapters;
+        if (chapters != null && currentChapter != null) {
+            // Find current chapter index
+            for (int i = 0; i < chapters.size(); i++) {
+                if (chapters.get(i).getId().equals(currentChapter.getId())) {
+                    this.currentChapterIndex = i;
+                    break;
+                }
+            }
+        }
+        updateChapterNavigationButtons();
+    }
+
+    private void updateChapterNavigationButtons() {
+        if (chapterList == null || chapterList.isEmpty()) {
+            prevChapterButton.setDisable(true);
+            nextChapterButton.setDisable(true);
+            return;
+        }
+
+        prevChapterButton.setDisable(currentChapterIndex <= 0);
+        nextChapterButton.setDisable(currentChapterIndex >= chapterList.size() - 1);
+    }
+
+    private void previousChapter() {
+        if (chapterList != null && currentChapterIndex > 0) {
+            Chapter prevChapter = chapterList.get(currentChapterIndex - 1);
+            loadChapter(prevChapter);
+            currentChapterIndex--;
+            updateChapterNavigationButtons();
+        }
+    }
+
+    private void nextChapter() {
+        if (chapterList != null && currentChapterIndex < chapterList.size() - 1) {
+            Chapter nextChapter = chapterList.get(currentChapterIndex + 1);
+            loadChapter(nextChapter);
+            currentChapterIndex++;
+            updateChapterNavigationButtons();
+        }
     }
 }

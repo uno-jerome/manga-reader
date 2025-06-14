@@ -202,14 +202,13 @@ public class MangaDexSource implements MangaSource {
 
     @Override
     public List<String> getAvailableGenres() {
-        // Return a list of predefined MangaDex genres
+        // Return only genres that we have UUID mappings for
         return Arrays.asList(
                 "Action", "Adventure", "Comedy", "Drama", "Fantasy",
-                "Horror", "Isekai", "Mystery", "Psychological", "Romance",
+                "Horror", "Mystery", "Psychological", "Romance",
                 "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller",
-                "Historical", "Mecha", "Music", "Shoujo", "Shounen",
-                "Seinen", "Josei", "Ecchi", "Genderswap", "Harem",
-                "School Life", "Tragedy", "Yaoi", "Yuri", "Martial Arts");
+                "School Life", "Shounen", "Shoujo", "Seinen", "Josei",
+                "Martial Arts", "Historical", "Medical", "Music", "Military");
     }
 
     @Override
@@ -219,40 +218,58 @@ public class MangaDexSource implements MangaSource {
                 "ongoing", "completed", "hiatus", "cancelled");
     }
 
-    // Helper method to convert genre name to MangaDex genre ID
-    private String getGenreIdByName(String genreName) {
-        // This is a simplified mapping, in a real application you'd have a more
-        // complete mapping
-        // These are some example genre IDs from MangaDex
+    // Helper method to convert genre name to MangaDex genre UUID
+    private String getGenreIdByName(String genreName) { // These are the actual UUID-based tag IDs from MangaDex API
+        // Reference: https://api.mangadx.org/manga/tag
         switch (genreName.toLowerCase()) {
             case "action":
-                return "2";
+                return "391b0423-d847-456f-aff0-8b0cfc03066b";
             case "adventure":
-                return "3";
+                return "87cc87cd-a395-47af-b27a-93258283bbc6";
             case "comedy":
-                return "4";
+                return "4d32cc48-9f00-4cca-9b5a-a839f0764984";
             case "drama":
-                return "5";
+                return "b9af3a63-f058-46de-a9a0-e0c13906197a";
             case "fantasy":
-                return "6";
+                return "cdc58593-87dd-415e-bbc0-2ec27bf404cc";
             case "horror":
-                return "7";
+                return "cdad7e68-1419-41dd-bdce-27753074a640";
             case "mystery":
-                return "8";
+                return "ee968100-4191-4968-93d3-f82d72be7e46";
             case "psychological":
-                return "9";
+                return "3b60b75c-a2d7-4860-ab56-05f391bb889c";
             case "romance":
-                return "10";
+                return "423e2eae-a7a2-4a8b-ac03-a8351462d71d";
             case "sci-fi":
-                return "11";
+                return "256c8bd9-4904-4360-bf4f-508a76d67183";
             case "slice of life":
-                return "12";
+                return "e5301a23-ebd9-49dd-a0cb-2add944c7fe9";
             case "sports":
-                return "13";
+                return "69964a64-2f90-4d33-beeb-f3ed2875eb4c";
             case "supernatural":
-                return "14";
+                return "eabc5b4c-6aff-42f3-b657-3e90cbd00b75";
             case "thriller":
-                return "15";
+                return "07251805-a27e-4d59-b488-f0bfbec15168";
+            case "school life":
+                return "caaa44eb-cd40-4177-b930-79d3ef2afe87";
+            case "shounen":
+                return "27a532ba-8adc-4e1d-ab25-4b4b680b0d7b";
+            case "shoujo":
+                return "a3c67850-4684-404e-9b7f-c69850ee5da6";
+            case "seinen":
+                return "a1f53773-c69a-4ce5-8cab-fffcd90b1565";
+            case "josei":
+                return "aa04485a-91c2-4b02-9b59-ec9f0e86b9c3";
+            case "martial arts":
+                return "799c202e-7daa-44eb-9cf7-8a3c0441531e";
+            case "historical":
+                return "33771934-028e-4cb3-8744-691e866a923e";
+            case "medical":
+                return "c8cbe35b-1b2b-4a3f-9c37-db84c4514856";
+            case "music":
+                return "f8f62932-27da-4fe4-8ee1-6779a8c5edba";
+            case "military":
+                return "ac72833b-c4e9-4878-b9db-6c8a4a99444a";
             default:
                 return null;
         }
@@ -294,6 +311,13 @@ public class MangaDexSource implements MangaSource {
     public List<Chapter> getChapters(String mangaId) {
         List<Chapter> chapters = new ArrayList<>();
         try {
+            // First get manga details to determine reading format
+            String mangaReadingFormat = "normal"; // default
+            Optional<Manga> mangaDetails = getMangaDetails(mangaId);
+            if (mangaDetails.isPresent() && mangaDetails.get().getReadingFormat() != null) {
+                mangaReadingFormat = mangaDetails.get().getReadingFormat();
+            }
+
             String url = String.format("%s/manga/%s/feed?translatedLanguage[]=en&limit=500", BASE_URL, mangaId);
             HttpGet request = new HttpGet(url);
 
@@ -315,6 +339,8 @@ public class MangaDexSource implements MangaSource {
                     Chapter chapter = parseChapterFromJson(chapterNode);
                     // Set the manga ID since we know it from the URL parameter
                     chapter.setMangaId(mangaId);
+                    // Inherit reading format from manga
+                    chapter.setReadingFormat(mangaReadingFormat);
                     chapters.add(chapter);
                 }
             }

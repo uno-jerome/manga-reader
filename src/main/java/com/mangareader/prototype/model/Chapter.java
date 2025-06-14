@@ -14,9 +14,11 @@ public class Chapter {
     private LocalDateTime releaseDate;
     private boolean downloaded;
     private String downloadPath;
+    private String readingFormat; // "normal" or "webtoon"
 
     public Chapter() {
         this.pageUrls = new ArrayList<>();
+        this.readingFormat = "normal"; // Default to normal reading mode
     }
 
     // Getters and Setters
@@ -91,4 +93,12 @@ public class Chapter {
     public void setDownloadPath(String downloadPath) {
         this.downloadPath = downloadPath;
     }
-} 
+
+    public String getReadingFormat() {
+        return readingFormat;
+    }
+
+    public void setReadingFormat(String readingFormat) {
+        this.readingFormat = readingFormat;
+    }
+}

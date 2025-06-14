@@ -1,11 +1,13 @@
 package com.mangareader.prototype.ui;
 
+import java.util.List;
+
 import com.mangareader.prototype.model.Chapter;
 import com.mangareader.prototype.model.Manga;
+import com.mangareader.prototype.service.MangaService;
+import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Background;
@@ -63,15 +65,7 @@ public class MainView extends BorderPane {
         searchField.setPromptText("Search manga...");
         searchField.setPrefWidth(300);
 
-        // Add buttons
-        Button addButton = new Button("Add Manga");
-        Button settingsButton = new Button("Settings");
-
-        toolBar.getItems().addAll(
-                searchField,
-                new Separator(),
-                addButton,
-                settingsButton);
+        toolBar.getItems().add(searchField);
 
         return toolBar;
     }
@@ -99,20 +93,27 @@ public class MainView extends BorderPane {
 
     private void showMangaDetailView(Manga manga) {
         contentArea.getChildren().clear();
-        MangaDetailView mangaDetailView = new MangaDetailView(this::showMangaReaderView);
+        MangaDetailView mangaDetailView = new MangaDetailView(
+                chapter -> showMangaReaderView(chapter, manga), // Pass manga to reader
+                this::showAddSeriesView);
         mangaDetailView.displayManga(manga);
         contentArea.getChildren().add(mangaDetailView);
     }
 
-    private void showMangaReaderView(Chapter chapter) {
+    private void showMangaReaderView(Chapter chapter, Manga manga) {
         contentArea.getChildren().clear();
         MangaReaderView mangaReaderView = new MangaReaderView(() -> {
             // Go back to the manga detail view
-            if (chapter != null && chapter.getMangaId() != null) {
-                // We need to refetch the manga details to go back
-                showLibraryView(); // For now, go back to library
-            }
+            showMangaDetailView(manga);
         });
+
+        // Get all chapters for navigation
+        MangaService mangaService = new DefaultMangaServiceImpl();
+        List<Chapter> allChapters = mangaService.getChapters(manga.getId());
+
+        // Set chapter list for navigation
+        mangaReaderView.setChapterList(allChapters, chapter);
+
         mangaReaderView.loadChapter(chapter);
         contentArea.getChildren().add(mangaReaderView);
     }

@@ -1,25 +1,5 @@
 package com.mangareader.prototype.ui;
 
-import com.mangareader.prototype.model.Manga;
-import com.mangareader.prototype.model.Chapter;
-import com.mangareader.prototype.service.MangaService;
-import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,6 +8,50 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import com.mangareader.prototype.model.Chapter;
+import com.mangareader.prototype.model.Manga;
+import com.mangareader.prototype.service.MangaService;
+import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
+
+import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Accordion;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Pagination;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 
 public class MangaDetailView extends BorderPane {
     // UI Components
@@ -61,19 +85,26 @@ public class MangaDetailView extends BorderPane {
     // Data
     private final MangaService mangaService;
     private final Consumer<Chapter> onChapterSelectedCallback;
+    private final Runnable onBackCallback;
     private Manga currentManga;
     private final ObservableList<Chapter> chapters = FXCollections.observableArrayList();
     private final FilteredList<Chapter> filteredChapters = new FilteredList<>(chapters, p -> true);
     private final SortedList<Chapter> sortedChapters = new SortedList<>(filteredChapters);
     private final int CHAPTERS_PER_PAGE = 50;
     private int currentChapterPage = 0;
+    private boolean updatingPagination = false; // Flag to prevent recursive pagination updates
 
     public MangaDetailView() {
-        this(null);
+        this(null, null);
     }
 
     public MangaDetailView(Consumer<Chapter> onChapterSelectedCallback) {
+        this(onChapterSelectedCallback, null);
+    }
+
+    public MangaDetailView(Consumer<Chapter> onChapterSelectedCallback, Runnable onBackCallback) {
         this.onChapterSelectedCallback = onChapterSelectedCallback;
+        this.onBackCallback = onBackCallback;
         this.mangaService = new DefaultMangaServiceImpl();
 
         setPadding(new Insets(20));
@@ -272,8 +303,11 @@ public class MangaDetailView extends BorderPane {
         chapterPagination = new Pagination(1, 0);
         chapterPagination.getStyleClass().add("simple-pagination");
         chapterPagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
-            currentChapterPage = newVal.intValue();
-            updateChapterTable();
+            // Prevent recursive calls when we're programmatically updating pagination
+            if (!updatingPagination) {
+                currentChapterPage = newVal.intValue();
+                updateChapterTable();
+            }
         });
 
         HBox paginationBox = new HBox(10, totalChaptersLabel, chapterPagination);
@@ -314,7 +348,8 @@ public class MangaDetailView extends BorderPane {
         });
 
         chaptersTable.getColumns().addAll(chapterColumn, titleColumn, volumeColumn, dateColumn, statusColumn);
-        chaptersTable.setItems(sortedChapters);
+
+        // Don't bind directly to sortedChapters - use pagination instead
 
         // Row click handler
         chaptersTable.setRowFactory(tv -> {
@@ -407,8 +442,27 @@ public class MangaDetailView extends BorderPane {
         HBox mainLayout = new HBox(30, leftPanel, rightPanel);
         mainLayout.setPadding(new Insets(20));
 
+        // Create back button at the very top
+        Button backButton = new Button("← Back");
+        backButton.setStyle(
+                "-fx-font-size: 14px; " +
+                        "-fx-background-color: #6c757d; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-padding: 10 20; " +
+                        "-fx-background-radius: 5;");
+        backButton.setOnAction(e -> {
+            if (onBackCallback != null) {
+                onBackCallback.run();
+            }
+        });
+
+        // Create a complete content layout with back button at the very top
+        VBox completeLayout = new VBox(15);
+        completeLayout.setPadding(new Insets(10, 20, 20, 20));
+        completeLayout.getChildren().addAll(backButton, mainLayout);
+
         // Add to the BorderPane
-        setCenter(new ScrollPane(mainLayout));
+        setCenter(new ScrollPane(completeLayout));
 
         // Initial sort order is newest first
         sortChapters("Newest First");
@@ -555,24 +609,49 @@ public class MangaDetailView extends BorderPane {
 
     // Update the chapter table with the current page of chapters
     private void updateChapterTable() {
-        int fromIndex = currentChapterPage * CHAPTERS_PER_PAGE;
+        // Prevent concurrent updates that can cause duplicate rows
+        Platform.runLater(() -> {
+            int fromIndex = currentChapterPage * CHAPTERS_PER_PAGE;
 
-        if (fromIndex >= sortedChapters.size()) {
-            return;
-        }
+            if (fromIndex >= sortedChapters.size() && sortedChapters.size() > 0) {
+                // Reset to first page if current page is out of bounds
+                currentChapterPage = 0;
+                fromIndex = 0;
+            }
 
-        // Update pagination
-        int pageCount = (int) Math.ceil((double) sortedChapters.size() / CHAPTERS_PER_PAGE);
-        if (pageCount == 0) {
-            pageCount = 1; // At least one page even if empty
-        }
-        chapterPagination.setPageCount(pageCount);
+            // Update pagination with flag to prevent recursive calls
+            updatingPagination = true;
+            try {
+                int pageCount = (int) Math.ceil((double) sortedChapters.size() / CHAPTERS_PER_PAGE);
+                if (pageCount == 0) {
+                    pageCount = 1; // At least one page even if empty
+                }
+                chapterPagination.setPageCount(pageCount);
 
-        // Update the current page if it's out of bounds
-        if (currentChapterPage >= pageCount) {
-            currentChapterPage = pageCount - 1;
-            chapterPagination.setCurrentPageIndex(currentChapterPage);
-        }
+                // Update the current page if it's out of bounds
+                if (currentChapterPage >= pageCount) {
+                    currentChapterPage = pageCount - 1;
+                }
+                chapterPagination.setCurrentPageIndex(currentChapterPage);
+            } finally {
+                updatingPagination = false;
+            }
+
+            // Create a sublist for the current page
+            int toIndex = Math.min(fromIndex + CHAPTERS_PER_PAGE, sortedChapters.size());
+
+            // Ensure we don't create an invalid sublist
+            if (fromIndex < sortedChapters.size()) {
+                List<Chapter> currentPageChapters = sortedChapters.subList(fromIndex, toIndex);
+
+                // Clear and update table content in a single operation to prevent duplication
+                chaptersTable.getItems().clear();
+                chaptersTable.getItems().addAll(currentPageChapters);
+            } else {
+                // No chapters to display
+                chaptersTable.getItems().clear();
+            }
+        });
     }
 
     // Filter chapters by search text
@@ -593,6 +672,9 @@ public class MangaDetailView extends BorderPane {
         Predicate<Chapter> volumePredicate = getVolumeFilterPredicate(volumeFilter);
 
         filteredChapters.setPredicate(volumePredicate.and(textPredicate));
+
+        // Reset to first page when filtering
+        currentChapterPage = 0;
         updateChapterTable();
     }
 
@@ -614,6 +696,9 @@ public class MangaDetailView extends BorderPane {
         };
 
         filteredChapters.setPredicate(volumePredicate.and(textPredicate));
+
+        // Reset to first page when filtering
+        currentChapterPage = 0;
         updateChapterTable();
     }
 
@@ -655,31 +740,39 @@ public class MangaDetailView extends BorderPane {
             });
         }
 
-        // Also update the grid and volume views
-        Tab gridTabForSort = chaptersTabPane.getTabs().get(1);
-        // Check if content is GridPane before casting
-        ScrollPane gridScrollPane = (ScrollPane) gridTabForSort.getContent();
-        if (gridScrollPane.getContent() instanceof GridPane) {
-            updateChapterGrid((GridPane) gridScrollPane.getContent(), sortedChapters);
-        } else {
-            // Content was replaced with loading state, create fresh grid
-            GridPane chapterGrid = createChapterGrid();
-            gridScrollPane.setContent(chapterGrid);
-            updateChapterGrid(chapterGrid, sortedChapters);
-        }
+        // Reset to first page when sorting changes
+        currentChapterPage = 0;
 
-        Tab volumeTabForSort = chaptersTabPane.getTabs().get(2);
-        // Check if content is Accordion before casting
-        ScrollPane volumeScrollPane = (ScrollPane) volumeTabForSort.getContent();
-        if (volumeScrollPane.getContent() instanceof Accordion) {
-            updateVolumeView((Accordion) volumeScrollPane.getContent(), sortedChapters);
-        } else {
-            // Content was replaced with loading state, create fresh accordion
-            Accordion volumeAccordion = new Accordion();
-            volumeAccordion.setPadding(new Insets(15));
-            volumeScrollPane.setContent(volumeAccordion);
-            updateVolumeView(volumeAccordion, sortedChapters);
-        }
+        // Update table after sorting
+        updateChapterTable();
+
+        // Also update the grid and volume views
+        Platform.runLater(() -> {
+            Tab gridTabForSort = chaptersTabPane.getTabs().get(1);
+            // Check if content is GridPane before casting
+            ScrollPane gridScrollPane = (ScrollPane) gridTabForSort.getContent();
+            if (gridScrollPane.getContent() instanceof GridPane) {
+                updateChapterGrid((GridPane) gridScrollPane.getContent(), sortedChapters);
+            } else {
+                // Content was replaced with loading state, create fresh grid
+                GridPane chapterGrid = createChapterGrid();
+                gridScrollPane.setContent(chapterGrid);
+                updateChapterGrid(chapterGrid, sortedChapters);
+            }
+
+            Tab volumeTabForSort = chaptersTabPane.getTabs().get(2);
+            // Check if content is Accordion before casting
+            ScrollPane volumeScrollPane = (ScrollPane) volumeTabForSort.getContent();
+            if (volumeScrollPane.getContent() instanceof Accordion) {
+                updateVolumeView((Accordion) volumeScrollPane.getContent(), sortedChapters);
+            } else {
+                // Content was replaced with loading state, create fresh accordion
+                Accordion volumeAccordion = new Accordion();
+                volumeAccordion.setPadding(new Insets(15));
+                volumeScrollPane.setContent(volumeAccordion);
+                updateVolumeView(volumeAccordion, sortedChapters);
+            }
+        });
     }
 
     // Load chapters for a manga
@@ -762,6 +855,9 @@ public class MangaDetailView extends BorderPane {
                     double progress = chapters.isEmpty() ? 0 : (double) chaptersRead / chapters.size();
                     readProgressBar.setProgress(progress);
                     readProgressLabel.setText(chaptersRead + " / " + chapters.size() + " chapters read");
+
+                    // Update the chapter table pagination
+                    updateChapterTable();
 
                 } else {
                     // No chapters found
