@@ -1,14 +1,21 @@
-// NOT USED YET //
 package com.mangareader.prototype.ui;
 
-import com.mangareader.prototype.model.Chapter;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import com.mangareader.prototype.model.Chapter;
+
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 public class ChapterListView extends VBox {
     private final TableView<Chapter> chapterTable;
@@ -39,7 +46,6 @@ public class ChapterListView extends VBox {
         statusLabel = new Label("No chapters available");
         statusLabel.setAlignment(javafx.geometry.Pos.CENTER);
 
-
         getChildren().addAll(header, chapterTable, statusLabel);
 
         VBox.setVgrow(chapterTable, Priority.ALWAYS);
@@ -68,8 +74,7 @@ public class ChapterListView extends VBox {
         dateCol.setCellValueFactory(data -> {
             if (data.getValue().getReleaseDate() != null) {
                 return new SimpleStringProperty(
-                        data.getValue().getReleaseDate().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                );
+                        data.getValue().getReleaseDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
             }
             return new SimpleStringProperty("");
         });
@@ -93,12 +98,10 @@ public class ChapterListView extends VBox {
             {
                 readButton.setOnAction(e -> {
                     Chapter chapter = getTableView().getItems().get(getIndex());
-                    // TODO: Handle read action
                 });
 
                 downloadButton.setOnAction(e -> {
                     Chapter chapter = getTableView().getItems().get(getIndex());
-                    // TODO: Handle download action
                 });
             }
 

@@ -1,15 +1,18 @@
 package com.mangareader.prototype.ui;
 
-import com.mangareader.prototype.model.Manga;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.Image;
-import javafx.scene.text.TextAlignment;
 import java.util.List;
 
-// NOT USED YET //
+import com.mangareader.prototype.model.Manga;
+
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
+
 public class MangaListView extends ScrollPane {
     private final FlowPane mangaGrid;
     private final Label statusLabel;
@@ -20,11 +23,11 @@ public class MangaListView extends ScrollPane {
         mangaGrid.setHgap(20);
         mangaGrid.setVgap(20);
         mangaGrid.setPadding(new Insets(20));
-        
+
         // Create status label
         statusLabel = new Label("No manga found");
         statusLabel.setTextAlignment(TextAlignment.CENTER);
-        
+
         // Set up the scroll pane
         setContent(mangaGrid);
         setFitToWidth(true);
@@ -34,7 +37,7 @@ public class MangaListView extends ScrollPane {
 
     public void displayManga(List<Manga> mangaList) {
         mangaGrid.getChildren().clear();
-        
+
         if (mangaList.isEmpty()) {
             mangaGrid.getChildren().add(statusLabel);
             return;
@@ -58,9 +61,11 @@ public class MangaListView extends ScrollPane {
         coverImage.setFitHeight(180);
         coverImage.setPreserveRatio(true);
         if (manga.getCoverUrl() != null) {
-            // TODO: Load image from URL
-            // For now, use a placeholder
-            coverImage.setImage(new Image("placeholder.png"));
+            try {
+                coverImage.setImage(new Image(manga.getCoverUrl(), true));
+            } catch (Exception e) {
+                coverImage.setImage(new Image("placeholder.png"));
+            }
         }
 
         // Title
@@ -74,12 +79,12 @@ public class MangaListView extends ScrollPane {
         statusLabel.setStyle("-fx-text-fill: gray;");
 
         card.getChildren().addAll(coverImage, titleLabel, statusLabel);
-        
+
         // Add click handler
         card.setOnMouseClicked(e -> {
-            // TODO: Handle manga selection
+            System.out.println("Selected manga: " + manga.getTitle());
         });
 
         return card;
     }
-} 
+}

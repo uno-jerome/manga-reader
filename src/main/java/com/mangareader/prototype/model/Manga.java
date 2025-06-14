@@ -22,7 +22,6 @@ public class Manga {
         this.chapters = new ArrayList<>();
     }
 
-    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -110,4 +109,4 @@ public class Manga {
     public void setLanguage(String language) {
         this.language = language;
     }
-} 
+}

@@ -27,7 +27,6 @@ public interface MangaService {
 
     void removeFromLibrary(String mangaId);
 
-    // Added methods to handle cover images and manga details
     Optional<Manga> getMangaDetails(String mangaId);
 
     String getCoverUrl(String mangaId);

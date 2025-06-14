@@ -320,7 +320,6 @@ public class MangaDetailView extends BorderPane {
         TableColumn<Chapter, String> statusColumn = new TableColumn<>("Status");
         statusColumn.setPrefWidth(100);
         statusColumn.setCellValueFactory(data -> {
-            // In a real app, this would check if the chapter has been read
             return new SimpleObjectProperty<>("Unread");
         });
         
@@ -340,7 +339,7 @@ public class MangaDetailView extends BorderPane {
                     }
 
                     // Style based on read status (placeholder for actual read status)
-                    boolean isRead = false; // This would check the actual read status
+                    boolean isRead = false;
                     if (isRead) {
                         setStyle("-fx-background-color: #f8f9fa;");
                     } else {
@@ -481,9 +480,8 @@ public class MangaDetailView extends BorderPane {
 
             // Read status indicator
             Circle readStatusIndicator = new Circle(5);
-            readStatusIndicator.setFill(Color.LIGHTGRAY);  // Default: unread
+            readStatusIndicator.setFill(Color.LIGHTGRAY);
             
-            // In a real app, check if this chapter has been read
             boolean isRead = false;
             if (isRead) {
                 readStatusIndicator.setFill(Color.GREEN);  // Read
@@ -601,9 +599,6 @@ public class MangaDetailView extends BorderPane {
             currentChapterPage = pageCount - 1;
             chapterPagination.setCurrentPageIndex(currentChapterPage);
         }
-        
-        // This would be used with a sublist in a real app
-        // Currently the TableView is directly bound to sortedChapters
     }
     
     // Filter chapters by search text
@@ -772,8 +767,7 @@ public class MangaDetailView extends BorderPane {
                     Tab volumeTabForFetch = chaptersTabPane.getTabs().get(2);
                     updateVolumeView((Accordion) ((ScrollPane) volumeTabForFetch.getContent()).getContent(), fetchedChapters);
                     
-                    // Update reading progress (placeholder for now)
-                    int chaptersRead = 0; // This would be replaced with actual data
+                    int chaptersRead = 0;
                     double progress = chapters.isEmpty() ? 0 : (double) chaptersRead / chapters.size();
                     readProgressBar.setProgress(progress);
                     readProgressLabel.setText(chaptersRead + " / " + chapters.size() + " chapters read");

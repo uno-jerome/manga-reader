@@ -26,26 +26,23 @@ public class Sidebar extends VBox {
         // Initialize sources
         sources = new ArrayList<>();
         sources.add(new MangaDexSource());
-        // TODO: Add more sources here
 
         // Create source selector
 
-        
         // Create navigation tree
         navigationTree = createNavigationTree();
-        
+
         // Create library list
         libraryList = createLibraryList();
 
         // Add components to sidebar
         getChildren().addAll(
-            createHeader(),
-            new Separator(),
-            navigationTree,
-            new Separator(),
-            new Label("Library"),
-            libraryList
-        );
+                createHeader(),
+                new Separator(),
+                navigationTree,
+                new Separator(),
+                new Label("Library"),
+                libraryList);
 
         VBox.setVgrow(navigationTree, Priority.ALWAYS);
         VBox.setVgrow(libraryList, Priority.ALWAYS);
@@ -57,19 +54,17 @@ public class Sidebar extends VBox {
         return header;
     }
 
-
     private TreeView<String> createNavigationTree() {
         TreeItem<String> root = new TreeItem<>("Navigation");
-        
+
         // Add navigation items
         root.getChildren().addAll(
-            new TreeItem<>("Library"),
-            new TreeItem<>("Updates"),
-            new TreeItem<>("Add Series"),
-            new TreeItem<>("Downloads"),
-            new TreeItem<>("Settings")
-        );
-        
+                new TreeItem<>("Library"),
+                new TreeItem<>("Updates"),
+                new TreeItem<>("Add Series"),
+                new TreeItem<>("Downloads"),
+                new TreeItem<>("Settings"));
+
         TreeView<String> tree = new TreeView<>(root);
         tree.setShowRoot(false);
         return tree;

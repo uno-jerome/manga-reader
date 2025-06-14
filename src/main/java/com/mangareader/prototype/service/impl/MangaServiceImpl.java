@@ -32,11 +32,9 @@ public abstract class MangaServiceImpl implements MangaService {
                 .registerModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        // Initialize data directory
         this.dataDir = Paths.get(System.getProperty("user.home"), ".houdoku");
         this.libraryFile = dataDir.resolve("library.json");
 
-        // Initialize manga source
         this.mangaSource = new MangaDexSource();
 
         try {
@@ -102,7 +100,6 @@ public abstract class MangaServiceImpl implements MangaService {
 
         try {
             Files.createDirectories(chapterDir);
-            // TODO: Implement actual page download
             chapter.setDownloaded(true);
             chapter.setDownloadPath(chapterDir.toString());
             saveLibrary();

@@ -158,15 +158,15 @@ public class AddSeriesModal extends Dialog<Manga> {
 
         // Language ComboBox
         languageComboBox = new ComboBox<>();
-        languageComboBox.getItems().addAll("English", "Japanese", "Korean", "Chinese"); // Example languages
-        languageComboBox.setValue(manga.getLanguage() != null ? manga.getLanguage() : "English"); // Default
+        languageComboBox.getItems().addAll("English", "Japanese", "Korean", "Chinese");
+        languageComboBox.setValue(manga.getLanguage() != null ? manga.getLanguage() : "English");
         languageComboBox.setPromptText("Language");
         languageComboBox.setStyle("-fx-background-color: white; -fx-border-color: #ced4da;");
 
         // Status ComboBox
         statusComboBox = new ComboBox<>();
-        statusComboBox.getItems().addAll("Ongoing", "Completed", "Hiatus", "Cancelled"); // Example statuses
-        statusComboBox.setValue(manga.getStatus() != null ? manga.getStatus() : "Ongoing"); // Default
+        statusComboBox.getItems().addAll("Ongoing", "Completed", "Hiatus", "Cancelled");
+        statusComboBox.setValue(manga.getStatus() != null ? manga.getStatus() : "Ongoing");
         statusComboBox.setPromptText("Status");
         statusComboBox.setStyle("-fx-background-color: white; -fx-border-color: #ced4da;");
 

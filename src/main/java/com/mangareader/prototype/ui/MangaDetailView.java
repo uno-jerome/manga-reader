@@ -94,7 +94,6 @@ public class MangaDetailView extends BorderPane {
         coverImageView.setStyle(
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0, 0, 4);");
 
-        // Set a placeholder image
         String placeholderUrl = "https://via.placeholder.com/250x350/f8f9fa/6c757d?text=No+Cover";
         coverImageView.setImage(new Image(placeholderUrl, true));
 
@@ -311,7 +310,6 @@ public class MangaDetailView extends BorderPane {
         TableColumn<Chapter, String> statusColumn = new TableColumn<>("Status");
         statusColumn.setPrefWidth(100);
         statusColumn.setCellValueFactory(data -> {
-            // In a real app, this would check if the chapter has been read
             return new SimpleObjectProperty<>("Unread");
         });
 
@@ -460,9 +458,8 @@ public class MangaDetailView extends BorderPane {
 
             // Read status indicator
             Circle readStatusIndicator = new Circle(5);
-            readStatusIndicator.setFill(Color.LIGHTGRAY); // Default: unread
+            readStatusIndicator.setFill(Color.LIGHTGRAY);
 
-            // In a real app, check if this chapter has been read
             boolean isRead = false;
             if (isRead) {
                 readStatusIndicator.setFill(Color.GREEN);
@@ -552,7 +549,6 @@ public class MangaDetailView extends BorderPane {
             TitledPane volumePane = new TitledPane(title + " (" + volumeChapterList.size() + " chapters)",
                     new ScrollPane(chapterGrid));
 
-            // Add volume cover if available (placeholder)
             accordion.getPanes().add(volumePane);
         });
     }
@@ -560,7 +556,6 @@ public class MangaDetailView extends BorderPane {
     // Update the chapter table with the current page of chapters
     private void updateChapterTable() {
         int fromIndex = currentChapterPage * CHAPTERS_PER_PAGE;
-        int toIndex = Math.min(fromIndex + CHAPTERS_PER_PAGE, sortedChapters.size());
 
         if (fromIndex >= sortedChapters.size()) {
             return;
@@ -578,9 +573,6 @@ public class MangaDetailView extends BorderPane {
             currentChapterPage = pageCount - 1;
             chapterPagination.setCurrentPageIndex(currentChapterPage);
         }
-
-        // This would be used with a sublist in a real app
-        // Currently the TableView is directly bound to sortedChapters
     }
 
     // Filter chapters by search text
@@ -766,8 +758,7 @@ public class MangaDetailView extends BorderPane {
                     ((ScrollPane) volumeTabForFetch.getContent()).setContent(volumeAccordion);
                     updateVolumeView(volumeAccordion, fetchedChapters);
 
-                    // Update reading progress (placeholder for now)
-                    int chaptersRead = 0; // This would be replaced with actual data
+                    int chaptersRead = 0;
                     double progress = chapters.isEmpty() ? 0 : (double) chaptersRead / chapters.size();
                     readProgressBar.setProgress(progress);
                     readProgressLabel.setText(chaptersRead + " / " + chapters.size() + " chapters read");
@@ -894,8 +885,6 @@ public class MangaDetailView extends BorderPane {
         // Update the volume filter dropdown based on manga's volumes
         updateVolumeFilter(manga);
 
-        // Update stats display (placeholder data - in a real app, this would come from
-        // the API)
         statsLabels.get("Rating").setText("4.8/5");
         statsLabels.get("Users").setText("12,345");
         statsLabels.get("Follows").setText("5,678");

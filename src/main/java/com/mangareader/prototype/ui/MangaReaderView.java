@@ -32,7 +32,7 @@ public class MangaReaderView extends StackPane {
     private int currentPageIndex;
 
     public MangaReaderView() {
-        this.mangaService = new DefaultMangaServiceImpl(); // Use concrete implementation
+        this.mangaService = new DefaultMangaServiceImpl();
         this.executorService = Executors.newSingleThreadExecutor();
 
         scrollPane = new ScrollPane();
@@ -44,7 +44,7 @@ public class MangaReaderView extends StackPane {
 
         pagesContainer = new VBox();
         pagesContainer.setAlignment(Pos.TOP_CENTER);
-        pagesContainer.setSpacing(5); // Small spacing between pages
+        pagesContainer.setSpacing(5);
         pagesContainer.setStyle("-fx-background-color: #333;");
 
         scrollPane.setContent(pagesContainer);
@@ -99,16 +99,15 @@ public class MangaReaderView extends StackPane {
 
         for (String url : pageUrls) {
             ImageView imageView = new ImageView();
-            imageView.setFitWidth(1000); // Set a reasonable default width
+            imageView.setFitWidth(1000);
             imageView.setPreserveRatio(true);
-            
-            // Asynchronously load image
+
             Image image = new Image(url, true);
             imageView.setImage(image);
-            
+
             pagesContainer.getChildren().add(imageView);
         }
-        scrollPane.setVvalue(0); // Scroll to top
+        scrollPane.setVvalue(0);
     }
 
     private void displayError(String message) {

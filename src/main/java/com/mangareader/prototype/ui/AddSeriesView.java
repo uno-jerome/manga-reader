@@ -47,7 +47,7 @@ public class AddSeriesView extends VBox {
     private final GridPane mangaGrid;
     private final List<MangaSource> sources;
     private final ScrollPane scrollPane;
-    private int columns = 5; // Default, will update dynamically
+    private int columns = 5;
     private List<Manga> currentResults = new ArrayList<>();
     private final int CARD_WIDTH = 180;
     private final int CARD_HEIGHT = 270;
@@ -73,7 +73,7 @@ public class AddSeriesView extends VBox {
     private boolean isAdvancedSearchVisible = false;
 
     public AddSeriesView() {
-        this(null); // Default constructor, no callback
+        this(null);
     }
 
     public AddSeriesView(Consumer<Manga> onMangaSelectedCallback) {
@@ -85,7 +85,6 @@ public class AddSeriesView extends VBox {
         // Initialize sources e.g., MangaDexSource
         sources = new ArrayList<>();
         sources.add(new MangaDexSource());
-        // TODO: Add more sources here (wag na, ayoko na)
 
         // Source selector
         sourceSelector = new ComboBox<>();
@@ -218,7 +217,6 @@ public class AddSeriesView extends VBox {
         scrollPane.viewportBoundsProperty().addListener((obs, oldVal, newVal) -> updateGridColumns());
         updateGridColumns();
 
-        // Placeholder covers
         updateMangaGridWithPlaceholders();
 
         // Search button action
