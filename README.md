@@ -1,6 +1,6 @@
 # MangaReader 📚
 
-A modern, cross-platform manga reader application built with JavaFX that provides a seamless reading experience with support for multiple manga sources.
+Final Project Requirement
 
 [![Java Version](https://img.shields.io/badge/Java-17%2B-orange.svg)](https://www.oracle.com/java/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-21.0.2-blue.svg)](https://openjfx.io/)
