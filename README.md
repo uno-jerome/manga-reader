@@ -238,12 +238,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/manga-reader/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/manga-reader/discussions)
-- **Wiki**: [Project Wiki](https://github.com/yourusername/manga-reader/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/manga-reader/discussions) // NOT WORKING!!
+- **Wiki**: [Project Wiki](https://github.com/yourusername/manga-reader/wiki) // NOT WORKING!!
 
 ---
 
-<div align="center">
-  <p>Made with ❤️ for manga lovers</p>
-  <p>⭐ Star this repo if you find it helpful!</p>
-</div>
