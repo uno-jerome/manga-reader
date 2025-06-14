@@ -227,15 +227,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-<<<<<<< HEAD
 - **Issues**: [GitHub Issues](https://github.com/uno-jerome/manga-reader/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/uno-jerome/manga-reader/discussions) // NOT WORKING!!
 - **Wiki**: [Project Wiki](https://github.com/uno-jerome/manga-reader/wiki) // NOT WORKING!!
-=======
-- **Issues**: [GitHub Issues](https://github.com/yourusername/manga-reader/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/manga-reader/discussions) // NOT WORKING!!
-- **Wiki**: [Project Wiki](https://github.com/yourusername/manga-reader/wiki) // NOT WORKING!!
->>>>>>> 20dd25fdf07709ab05316101dcfe106d890f028c
 
 ---
 
