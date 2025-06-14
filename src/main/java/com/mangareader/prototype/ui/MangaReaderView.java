@@ -1,12 +1,15 @@
 package com.mangareader.prototype.ui;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.mangareader.prototype.model.Chapter;
+import com.mangareader.prototype.service.LibraryService;
 import com.mangareader.prototype.service.MangaService;
 import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
+import com.mangareader.prototype.service.impl.LibraryServiceImpl;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -43,9 +46,11 @@ public class MangaReaderView extends BorderPane {
     private final HBox controlsBox;
 
     private final MangaService mangaService;
+    private final LibraryService libraryService;
     private final ExecutorService executorService;
 
     private Chapter currentChapter;
+    private String currentMangaId; // Add manga ID tracking for progress saving
     private List<String> pageUrls;
     private int currentPageIndex = 0;
     private double zoomLevel = 1.0;
@@ -63,6 +68,7 @@ public class MangaReaderView extends BorderPane {
     public MangaReaderView(Runnable onBackCallback) {
         this.onBackCallback = onBackCallback;
         this.mangaService = new DefaultMangaServiceImpl();
+        this.libraryService = new LibraryServiceImpl();
         this.executorService = Executors.newSingleThreadExecutor();
 
         // Main image container with dark background (for traditional mode)
@@ -316,6 +322,11 @@ public class MangaReaderView extends BorderPane {
         this.currentChapter = chapter;
         this.currentPageIndex = 0;
 
+        // Try to restore reading position if in library
+        if (currentMangaId != null && libraryService.isInLibrary(currentMangaId)) {
+            restoreReadingPosition();
+        }
+
         // Auto-detect reading mode based on chapter format
         if (chapter.getReadingFormat() != null && "webtoon".equals(chapter.getReadingFormat())) {
             if (!isWebtoonMode) {
@@ -454,6 +465,7 @@ public class MangaReaderView extends BorderPane {
             currentPageIndex--;
             displayCurrentPage();
             updateNavigationButtons();
+            saveReadingPosition(); // Auto-save progress
         }
     }
 
@@ -462,6 +474,7 @@ public class MangaReaderView extends BorderPane {
             currentPageIndex++;
             displayCurrentPage();
             updateNavigationButtons();
+            saveReadingPosition(); // Auto-save progress
         }
     }
 
@@ -558,6 +571,62 @@ public class MangaReaderView extends BorderPane {
             loadChapter(nextChapter);
             currentChapterIndex++;
             updateChapterNavigationButtons();
+        }
+    }
+
+    /**
+     * Set the manga ID for progress tracking
+     */
+    public void setMangaId(String mangaId) {
+        this.currentMangaId = mangaId;
+    }
+
+    /**
+     * Save current reading position to library
+     */
+    private void saveReadingPosition() {
+        if (currentMangaId != null && currentChapter != null &&
+                libraryService.isInLibrary(currentMangaId)) {
+
+            int totalPages = pageUrls != null ? pageUrls.size() : 0;
+            libraryService.updateReadingPosition(
+                    currentMangaId,
+                    currentChapter.getId(),
+                    currentPageIndex,
+                    totalPages);
+
+            // Mark chapter as read if we've reached the end
+            if (currentPageIndex >= totalPages - 1) {
+                libraryService.markChapterAsRead(currentMangaId, currentChapter.getId());
+            }
+        }
+    }
+
+    /**
+     * Restore reading position from library
+     */
+    private void restoreReadingPosition() {
+        if (currentMangaId != null && currentChapter != null) {
+            Optional<LibraryService.ReadingPosition> position = libraryService.getReadingPosition(currentMangaId);
+
+            if (position.isPresent()) {
+                LibraryService.ReadingPosition pos = position.get();
+                // Only restore if it's the same chapter
+                if (currentChapter.getId().equals(pos.getChapterId())) {
+                    currentPageIndex = Math.max(0, pos.getPageNumber());
+                    System.out.println("Restored reading position: page " + (currentPageIndex + 1));
+                }
+            }
+        }
+    }
+
+    public List<Chapter> getChapterList() {
+        return chapterList;
+    }
+
+    public void cleanup() {
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
         }
     }
 }

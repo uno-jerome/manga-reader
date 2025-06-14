@@ -12,6 +12,7 @@ import com.mangareader.prototype.model.SearchParams;
 import com.mangareader.prototype.model.SearchResult;
 import com.mangareader.prototype.source.MangaSource;
 import com.mangareader.prototype.source.impl.MangaDexSource;
+import com.mangareader.prototype.util.ImageCache;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -39,7 +40,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 
-public class AddSeriesView extends VBox {
+public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListener {
     private final ComboBox<MangaSource> sourceSelector;
     private final TextField searchField;
     private final Button searchButton;
@@ -47,6 +48,7 @@ public class AddSeriesView extends VBox {
     private final GridPane mangaGrid;
     private final List<MangaSource> sources;
     private final ScrollPane scrollPane;
+    private final ThemeManager themeManager;
     private int columns = 5;
     private List<Manga> currentResults = new ArrayList<>();
     private final int CARD_WIDTH = 180;
@@ -78,6 +80,8 @@ public class AddSeriesView extends VBox {
 
     public AddSeriesView(Consumer<Manga> onMangaSelectedCallback) {
         this.onMangaSelectedCallback = onMangaSelectedCallback;
+        this.themeManager = ThemeManager.getInstance();
+
         setSpacing(16);
         setPadding(new Insets(24));
         setAlignment(Pos.TOP_CENTER);
@@ -256,6 +260,9 @@ public class AddSeriesView extends VBox {
 
         // Fetch and display default manga list
         fetchAndDisplayDefaultManga();
+
+        // Register theme listener after initialization
+        themeManager.addThemeChangeListener(this);
     }
 
     private void setupAdvancedSearchPane() {
@@ -561,15 +568,19 @@ public class AddSeriesView extends VBox {
 
         System.out.println("Loading cover: " + manga.getCoverUrl());
         try {
+            ImageCache imageCache = ImageCache.getInstance();
             if (manga.getCoverUrl() != null && !manga.getCoverUrl().isEmpty()) {
-                Image image = new Image(manga.getCoverUrl(), true);
+                Image image = imageCache.getImage(manga.getCoverUrl());
                 imageView.setImage(image);
             } else {
-                imageView.setImage(new Image("https://via.placeholder.com/180x270?text=No+Cover"));
+                Image placeholderImage = imageCache.getPlaceholderImage("No+Cover");
+                imageView.setImage(placeholderImage);
             }
         } catch (Exception e) {
             System.err.println("Error loading image: " + manga.getCoverUrl() + " | " + e.getMessage());
-            imageView.setImage(new Image("https://via.placeholder.com/180x270?text=Error"));
+            ImageCache imageCache = ImageCache.getInstance();
+            Image errorImage = imageCache.getPlaceholderImage("Error");
+            imageView.setImage(errorImage);
         }
 
         Label titleLabel = new Label(manga.getTitle());
@@ -625,5 +636,86 @@ public class AddSeriesView extends VBox {
         return box;
     }
 
-    // Method removed as it was unused
+    @Override
+    public void onThemeChanged(ThemeManager.Theme newTheme) {
+        // Update the main background
+        String backgroundColor = themeManager.getBackgroundColor();
+        setStyle("-fx-background-color: " + backgroundColor + ";");
+
+        // Update existing manga card themes without clearing the grid
+        updateExistingMangaCardThemes();
+
+        // Update other UI components
+        updateComponentThemes();
+    }
+
+    private void updateExistingMangaCardThemes() {
+        String cardBackgroundColor = themeManager.isDarkTheme() ? "#222" : "#fff";
+        String textColor = themeManager.getTextColor();
+
+        // Update existing manga cards in the grid
+        mangaGrid.getChildren().forEach(node -> {
+            if (node instanceof VBox) {
+                VBox card = (VBox) node;
+                // Update card background
+                String currentStyle = card.getStyle();
+                String newStyle = currentStyle.replaceAll("-fx-background-color: [^;]+;", "")
+                        + " -fx-background-color: " + cardBackgroundColor + ";";
+                card.setStyle(newStyle);
+
+                // Update text color in labels
+                card.getChildren().forEach(child -> {
+                    if (child instanceof HBox) {
+                        HBox titleBox = (HBox) child;
+                        titleBox.getChildren().forEach(titleChild -> {
+                            if (titleChild instanceof Label) {
+                                Label titleLabel = (Label) titleChild;
+                                String labelStyle = titleLabel.getStyle();
+                                String newLabelStyle = labelStyle.replaceAll("-fx-text-fill: [^;]+;", "")
+                                        + " -fx-text-fill: " + textColor + ";";
+                                titleLabel.setStyle(newLabelStyle);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateComponentThemes() {
+        String backgroundColor = themeManager.getBackgroundColor();
+        String textColor = themeManager.getTextColor();
+        String secondaryBackgroundColor = themeManager.getSecondaryBackgroundColor();
+        String borderColor = themeManager.getBorderColor();
+
+        // Update search field
+        if (searchField != null) {
+            searchField.setStyle(String.format(
+                    "-fx-background-color: %s; " +
+                            "-fx-text-fill: %s; " +
+                            "-fx-border-color: %s; " +
+                            "-fx-border-width: 1px; " +
+                            "-fx-background-radius: 4px; " +
+                            "-fx-border-radius: 4px;",
+                    secondaryBackgroundColor, textColor, borderColor));
+        }
+
+        // Update advanced search pane
+        if (advancedSearchPane != null) {
+            advancedSearchPane.setStyle(String.format(
+                    "-fx-background-color: %s; " +
+                            "-fx-border-color: %s; " +
+                            "-fx-border-radius: 5; " +
+                            "-fx-background-radius: 5;",
+                    secondaryBackgroundColor, borderColor));
+        }
+
+        // Update scroll pane
+        if (scrollPane != null) {
+            scrollPane.setStyle(String.format(
+                    "-fx-background-color: %s; " +
+                            "-fx-border-color: %s;",
+                    secondaryBackgroundColor, borderColor));
+        }
+    }
 }

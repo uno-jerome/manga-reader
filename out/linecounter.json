@@ -923,6 +923,511 @@
                     "filename": "TestChapterPages.java"
                 }
             ]
+        },
+        {
+            "version": "0.2.7",
+            "counttime": "2025-06-15 05:06:28",
+            "filesum": 72,
+            "codesum": 5418,
+            "commentsum": 666,
+            "blanksum": 1116,
+            "statistics": {
+                ".css": {
+                    "code": 618,
+                    "comment": 60,
+                    "blank": 146
+                },
+                ".java": {
+                    "code": 4323,
+                    "comment": 590,
+                    "blank": 893
+                },
+                ".xml": {
+                    "code": 224,
+                    "comment": 4,
+                    "blank": 7
+                },
+                "": {
+                    "code": 22,
+                    "comment": 0,
+                    "blank": 4
+                },
+                ".lst": {
+                    "code": 46,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".md": {
+                    "code": 185,
+                    "comment": 12,
+                    "blank": 66
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": ".idea\\.gitignore"
+                },
+                {
+                    "blank": 0,
+                    "code": 13,
+                    "comment": 0,
+                    "filename": ".idea\\compiler.xml"
+                },
+                {
+                    "blank": 0,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": ".idea\\encodings.xml"
+                },
+                {
+                    "blank": 0,
+                    "code": 20,
+                    "comment": 0,
+                    "filename": ".idea\\jarRepositories.xml"
+                },
+                {
+                    "blank": 0,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": ".idea\\misc.xml"
+                },
+                {
+                    "blank": 0,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": ".idea\\vcs.xml"
+                },
+                {
+                    "blank": 0,
+                    "code": 87,
+                    "comment": 0,
+                    "filename": ".idea\\workspace.xml"
+                },
+                {
+                    "blank": 2,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "IMPLEMENTATION_SUMMARY.md"
+                },
+                {
+                    "blank": 4,
+                    "code": 17,
+                    "comment": 0,
+                    "filename": "LICENSE"
+                },
+                {
+                    "blank": 7,
+                    "code": 79,
+                    "comment": 4,
+                    "filename": "pom.xml"
+                },
+                {
+                    "blank": 64,
+                    "code": 181,
+                    "comment": 12,
+                    "filename": "README.md"
+                },
+                {
+                    "blank": 8,
+                    "code": 21,
+                    "comment": 4,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\MangaReaderApplication.java"
+                },
+                {
+                    "blank": 23,
+                    "code": 80,
+                    "comment": 3,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\model\\Chapter.java"
+                },
+                {
+                    "blank": 27,
+                    "code": 95,
+                    "comment": 2,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\model\\Manga.java"
+                },
+                {
+                    "blank": 25,
+                    "code": 99,
+                    "comment": 6,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\model\\SearchParams.java"
+                },
+                {
+                    "blank": 15,
+                    "code": 60,
+                    "comment": 4,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\model\\SearchResult.java"
+                },
+                {
+                    "blank": 2,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\service\\impl\\DefaultMangaServiceImpl.java"
+                },
+                {
+                    "blank": 43,
+                    "code": 216,
+                    "comment": 13,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\service\\impl\\LibraryServiceImpl.java"
+                },
+                {
+                    "blank": 21,
+                    "code": 140,
+                    "comment": 7,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\service\\impl\\MangaServiceImpl.java"
+                },
+                {
+                    "blank": 18,
+                    "code": 39,
+                    "comment": 58,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\service\\LibraryService.java"
+                },
+                {
+                    "blank": 14,
+                    "code": 19,
+                    "comment": 0,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\service\\MangaService.java"
+                },
+                {
+                    "blank": 65,
+                    "code": 515,
+                    "comment": 47,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\source\\impl\\MangaDexSource.java"
+                },
+                {
+                    "blank": 12,
+                    "code": 19,
+                    "comment": 12,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\source\\MangaSource.java"
+                },
+                {
+                    "blank": 63,
+                    "code": 403,
+                    "comment": 83,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\AddSeriesModal.java"
+                },
+                {
+                    "blank": 84,
+                    "code": 486,
+                    "comment": 76,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\AddSeriesView.java"
+                },
+                {
+                    "blank": 31,
+                    "code": 105,
+                    "comment": 9,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\ChapterListView.java"
+                },
+                {
+                    "blank": 56,
+                    "code": 279,
+                    "comment": 15,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\LibraryView.java"
+                },
+                {
+                    "blank": 40,
+                    "code": 170,
+                    "comment": 36,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\MainView.java"
+                },
+                {
+                    "blank": 190,
+                    "code": 845,
+                    "comment": 124,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\MangaDetailView.java"
+                },
+                {
+                    "blank": 84,
+                    "code": 432,
+                    "comment": 58,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\MangaReaderView.java"
+                },
+                {
+                    "blank": 24,
+                    "code": 106,
+                    "comment": 9,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\SettingsView.java"
+                },
+                {
+                    "blank": 19,
+                    "code": 69,
+                    "comment": 7,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\Sidebar.java"
+                },
+                {
+                    "blank": 25,
+                    "code": 84,
+                    "comment": 17,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\ThemeManager.java"
+                },
+                {
+                    "blank": 2,
+                    "code": 10,
+                    "comment": 0,
+                    "filename": "src\\main\\java\\com\\mangareader\\prototype\\ui\\UpdatesView.java"
+                },
+                {
+                    "blank": 2,
+                    "code": 24,
+                    "comment": 0,
+                    "filename": "src\\main\\java\\module-info.java"
+                },
+                {
+                    "blank": 51,
+                    "code": 217,
+                    "comment": 20,
+                    "filename": "src\\main\\resources\\styles\\dark.css"
+                },
+                {
+                    "blank": 22,
+                    "code": 92,
+                    "comment": 10,
+                    "filename": "src\\main\\resources\\styles\\main.css"
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\MangaReaderApplication.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\model\\Chapter.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\model\\Manga.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\model\\SearchParams.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\model\\SearchResult.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\impl\\DefaultMangaServiceImpl.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\impl\\LibraryServiceImpl$LibraryEntry.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\impl\\LibraryServiceImpl.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\impl\\MangaServiceImpl.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\LibraryService$LibraryStats.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\LibraryService.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\service\\MangaService.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\source\\impl\\MangaDexSource.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\source\\MangaSource.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\AddSeriesModal.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\AddSeriesView$1.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\AddSeriesView$2.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\AddSeriesView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\ChapterListView$1.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\ChapterListView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\LibraryView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\MainView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\MangaDetailView$1.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\MangaDetailView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\MangaReaderView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\SettingsView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\Sidebar.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\ThemeManager$Theme.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\ThemeManager.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\com\\mangareader\\prototype\\ui\\UpdatesView.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "target\\classes\\module-info.class",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 51,
+                    "code": 217,
+                    "comment": 20,
+                    "filename": "target\\classes\\styles\\dark.css"
+                },
+                {
+                    "blank": 22,
+                    "code": 92,
+                    "comment": 10,
+                    "filename": "target\\classes\\styles\\main.css"
+                },
+                {
+                    "blank": 0,
+                    "code": 25,
+                    "comment": 0,
+                    "filename": "target\\maven-status\\maven-compiler-plugin\\compile\\default-compile\\createdFiles.lst"
+                },
+                {
+                    "blank": 0,
+                    "code": 21,
+                    "comment": 0,
+                    "filename": "target\\maven-status\\maven-compiler-plugin\\compile\\default-compile\\inputFiles.lst"
+                }
+            ]
         }
     ]
 }

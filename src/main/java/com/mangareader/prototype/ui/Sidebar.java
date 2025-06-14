@@ -21,18 +21,21 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class Sidebar extends VBox {
+public class Sidebar extends VBox implements ThemeManager.ThemeChangeListener {
     private final ListView<String> libraryList;
     private final TreeView<String> navigationTree;
     private final List<MangaSource> sources;
+    private final ThemeManager themeManager;
 
     public Sidebar() {
+        // Initialize theme manager
+        themeManager = ThemeManager.getInstance();
+
         // Set up the sidebar layout
         setPrefWidth(250);
         setMinWidth(200);
         setMaxWidth(300);
-        setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-        setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, null)));
+        updateSidebarTheme(); // Use theme colors instead of hardcoded white
         setPadding(new Insets(10));
 
         // Initialize sources
@@ -51,13 +54,12 @@ public class Sidebar extends VBox {
         getChildren().addAll(
                 createHeader(),
                 new Separator(),
-                navigationTree,
-                new Separator(),
-                new Label("Library"),
-                libraryList);
+                navigationTree);
 
         VBox.setVgrow(navigationTree, Priority.ALWAYS);
-        VBox.setVgrow(libraryList, Priority.ALWAYS);
+
+        // Register theme listener after initialization is complete
+        themeManager.addThemeChangeListener(this);
     }
 
     private Label createHeader() {
@@ -96,4 +98,36 @@ public class Sidebar extends VBox {
         return navigationTree;
     }
 
+    @Override
+    public void onThemeChanged(ThemeManager.Theme newTheme) {
+        updateSidebarTheme();
+    }
+
+    private void updateSidebarTheme() {
+        String backgroundColor = themeManager.getSecondaryBackgroundColor();
+        String borderColor = themeManager.getBorderColor();
+
+        setBackground(new Background(new BackgroundFill(Color.web(backgroundColor), null, null)));
+        setBorder(new Border(new BorderStroke(Color.web(borderColor), BorderStrokeStyle.SOLID, null, null)));
+
+        // Update tree view theme
+        if (navigationTree != null) {
+            String textColor = themeManager.getTextColor();
+            navigationTree.setStyle(String.format(
+                    "-fx-background-color: %s; " +
+                            "-fx-text-fill: %s; " +
+                            "-fx-border-color: %s;",
+                    backgroundColor, textColor, borderColor));
+        }
+
+        // Update library list theme
+        if (libraryList != null) {
+            String textColor = themeManager.getTextColor();
+            libraryList.setStyle(String.format(
+                    "-fx-background-color: %s; " +
+                            "-fx-text-fill: %s; " +
+                            "-fx-border-color: %s;",
+                    backgroundColor, textColor, borderColor));
+        }
+    }
 }

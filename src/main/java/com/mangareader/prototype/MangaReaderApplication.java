@@ -1,6 +1,8 @@
 package com.mangareader.prototype;
 
 import com.mangareader.prototype.ui.MainView;
+import com.mangareader.prototype.ui.ThemeManager;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -11,13 +13,14 @@ public class MangaReaderApplication extends Application {
     public void start(Stage primaryStage) {
         // Create the main view
         MainView mainView = new MainView();
-        
+
         // Create the scene
         Scene scene = new Scene(mainView, 1280, 720);
-        
-        // Add CSS styling
-        scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-        
+
+        // Initialize theme manager with the scene
+        ThemeManager themeManager = ThemeManager.getInstance();
+        themeManager.initializeWithScene(scene);
+
         // Set up the stage
         primaryStage.setTitle("MangaReader");
         primaryStage.setScene(scene);
@@ -27,4 +30,4 @@ public class MangaReaderApplication extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-} 
+}

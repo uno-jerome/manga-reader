@@ -173,3 +173,97 @@ target\maven-status\maven-compiler-plugin\compile\default-compile\createdFiles.l
 target\maven-status\maven-compiler-plugin\compile\default-compile\inputFiles.lst, code is 22, comment is 0, blank is 0.
 TestChapterPages.java, code is 0, comment is 0, blank is 0.
 ===============================================================================
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2025-06-15 05:06:28
+count workspace : d:\Downloads\houdoku\houdoku\manga-reader
+total files : 72
+total code lines : 5418
+total comment lines : 666
+total blank lines : 1116
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |           .css|            618|             60|            146|     11|
+   |          .java|           4323|            590|            893|     80|
+   |           .xml|            224|              4|              7|    4.1|
+   |               |             22|              0|              4|   0.41|
+   |           .lst|             46|              0|              0|   0.85|
+   |            .md|            185|             12|             66|    3.4|
+   -------------------------------------------------------------------------
+.idea\.gitignore, code is 5, comment is 0, blank is 0.
+.idea\compiler.xml, code is 13, comment is 0, blank is 0.
+.idea\encodings.xml, code is 7, comment is 0, blank is 0.
+.idea\jarRepositories.xml, code is 20, comment is 0, blank is 0.
+.idea\misc.xml, code is 12, comment is 0, blank is 0.
+.idea\vcs.xml, code is 6, comment is 0, blank is 0.
+.idea\workspace.xml, code is 87, comment is 0, blank is 0.
+IMPLEMENTATION_SUMMARY.md, code is 4, comment is 0, blank is 2.
+LICENSE, code is 17, comment is 0, blank is 4.
+pom.xml, code is 79, comment is 4, blank is 7.
+README.md, code is 181, comment is 12, blank is 64.
+src\main\java\com\mangareader\prototype\MangaReaderApplication.java, code is 21, comment is 4, blank is 8.
+src\main\java\com\mangareader\prototype\model\Chapter.java, code is 80, comment is 3, blank is 23.
+src\main\java\com\mangareader\prototype\model\Manga.java, code is 95, comment is 2, blank is 27.
+src\main\java\com\mangareader\prototype\model\SearchParams.java, code is 99, comment is 6, blank is 25.
+src\main\java\com\mangareader\prototype\model\SearchResult.java, code is 60, comment is 4, blank is 15.
+src\main\java\com\mangareader\prototype\service\impl\DefaultMangaServiceImpl.java, code is 7, comment is 0, blank is 2.
+src\main\java\com\mangareader\prototype\service\impl\LibraryServiceImpl.java, code is 216, comment is 13, blank is 43.
+src\main\java\com\mangareader\prototype\service\impl\MangaServiceImpl.java, code is 140, comment is 7, blank is 21.
+src\main\java\com\mangareader\prototype\service\LibraryService.java, code is 39, comment is 58, blank is 18.
+src\main\java\com\mangareader\prototype\service\MangaService.java, code is 19, comment is 0, blank is 14.
+src\main\java\com\mangareader\prototype\source\impl\MangaDexSource.java, code is 515, comment is 47, blank is 65.
+src\main\java\com\mangareader\prototype\source\MangaSource.java, code is 19, comment is 12, blank is 12.
+src\main\java\com\mangareader\prototype\ui\AddSeriesModal.java, code is 403, comment is 83, blank is 63.
+src\main\java\com\mangareader\prototype\ui\AddSeriesView.java, code is 486, comment is 76, blank is 84.
+src\main\java\com\mangareader\prototype\ui\ChapterListView.java, code is 105, comment is 9, blank is 31.
+src\main\java\com\mangareader\prototype\ui\LibraryView.java, code is 279, comment is 15, blank is 56.
+src\main\java\com\mangareader\prototype\ui\MainView.java, code is 170, comment is 36, blank is 40.
+src\main\java\com\mangareader\prototype\ui\MangaDetailView.java, code is 845, comment is 124, blank is 190.
+src\main\java\com\mangareader\prototype\ui\MangaReaderView.java, code is 432, comment is 58, blank is 84.
+src\main\java\com\mangareader\prototype\ui\SettingsView.java, code is 106, comment is 9, blank is 24.
+src\main\java\com\mangareader\prototype\ui\Sidebar.java, code is 69, comment is 7, blank is 19.
+src\main\java\com\mangareader\prototype\ui\ThemeManager.java, code is 84, comment is 17, blank is 25.
+src\main\java\com\mangareader\prototype\ui\UpdatesView.java, code is 10, comment is 0, blank is 2.
+src\main\java\module-info.java, code is 24, comment is 0, blank is 2.
+src\main\resources\styles\dark.css, code is 217, comment is 20, blank is 51.
+src\main\resources\styles\main.css, code is 92, comment is 10, blank is 22.
+target\classes\com\mangareader\prototype\MangaReaderApplication.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\Chapter.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\Manga.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\SearchParams.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\SearchResult.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\DefaultMangaServiceImpl.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\LibraryServiceImpl$LibraryEntry.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\LibraryServiceImpl.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\MangaServiceImpl.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\LibraryService$LibraryStats.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\LibraryService.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\MangaService.class, it is a binary file.
+target\classes\com\mangareader\prototype\source\impl\MangaDexSource.class, it is a binary file.
+target\classes\com\mangareader\prototype\source\MangaSource.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\AddSeriesModal.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\AddSeriesView$1.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\AddSeriesView$2.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\AddSeriesView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\ChapterListView$1.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\ChapterListView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\LibraryView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\MainView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\MangaDetailView$1.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\MangaDetailView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\MangaReaderView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\SettingsView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\Sidebar.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\ThemeManager$Theme.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\ThemeManager.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\UpdatesView.class, it is a binary file.
+target\classes\module-info.class, it is a binary file.
+target\classes\styles\dark.css, code is 217, comment is 20, blank is 51.
+target\classes\styles\main.css, code is 92, comment is 10, blank is 22.
+target\maven-status\maven-compiler-plugin\compile\default-compile\createdFiles.lst, code is 25, comment is 0, blank is 0.
+target\maven-status\maven-compiler-plugin\compile\default-compile\inputFiles.lst, code is 21, comment is 0, blank is 0.
+===============================================================================

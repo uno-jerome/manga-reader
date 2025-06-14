@@ -54,7 +54,7 @@ public class AddSeriesModal extends Dialog<Manga> {
         System.out.println("  Author: " + manga.getAuthor());
         System.out.println("  Artist: " + manga.getArtist());
 
-        setTitle("Add Series");
+        setTitle("View Series");
         setHeaderText(null); // No default header text
 
         // Setup dialog pane
@@ -250,7 +250,7 @@ public class AddSeriesModal extends Dialog<Manga> {
 
         // --- Buttons --- //
         ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        ButtonType addSeriesButtonType = new ButtonType("Add Series", ButtonBar.ButtonData.APPLY);
+        ButtonType addSeriesButtonType = new ButtonType("View Series", ButtonBar.ButtonData.APPLY);
         dialogPane.getButtonTypes().addAll(cancelButtonType, addSeriesButtonType);
 
         // Button actions
