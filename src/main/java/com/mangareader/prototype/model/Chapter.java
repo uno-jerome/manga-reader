@@ -12,9 +12,9 @@ public class Chapter {
     private String volume;
     private List<String> pageUrls;
     private LocalDateTime releaseDate;
+    private String readingFormat; // "normal" or "webtoon"
     private boolean downloaded;
     private String downloadPath;
-    private String readingFormat; // "normal" or "webtoon"
 
     public Chapter() {
         this.pageUrls = new ArrayList<>();

@@ -84,7 +84,7 @@ public class SearchParams {
     }
 
     public void setPage(int page) {
-        this.page = Math.max(1, page); // Page can't be less than 1
+        this.page = Math.max(1, page);
     }
 
     public void nextPage() {

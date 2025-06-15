@@ -8,6 +8,7 @@ module com.mangareader.prototype {
     requires com.fasterxml.jackson.datatype.jsr310;
     requires org.apache.httpcomponents.client5.httpclient5;
     requires org.apache.httpcomponents.core5.httpcore5;
+    requires org.jsoup;
     requires java.net.http;
     requires java.sql;
     requires java.prefs;
@@ -23,4 +24,6 @@ module com.mangareader.prototype {
     exports com.mangareader.prototype.model;
     exports com.mangareader.prototype.source;
     exports com.mangareader.prototype.source.impl;
+    exports com.mangareader.prototype.service;
+    exports com.mangareader.prototype.service.impl;
 }

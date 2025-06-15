@@ -42,8 +42,6 @@ public class Sidebar extends VBox implements ThemeManager.ThemeChangeListener {
         sources = new ArrayList<>();
         sources.add(new MangaDexSource());
 
-        // Create source selector
-
         // Create navigation tree
         navigationTree = createNavigationTree();
 
@@ -74,9 +72,7 @@ public class Sidebar extends VBox implements ThemeManager.ThemeChangeListener {
         // Add navigation items
         root.getChildren().addAll(
                 new TreeItem<>("Library"),
-                new TreeItem<>("Updates"),
                 new TreeItem<>("Add Series"),
-                new TreeItem<>("Downloads"),
                 new TreeItem<>("Settings"));
 
         TreeView<String> tree = new TreeView<>(root);

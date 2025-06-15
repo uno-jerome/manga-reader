@@ -65,7 +65,6 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
     private final TextArea descriptionArea;
     private final FlowPane genresPane;
     private final Button readButton;
-    private final Button downloadButton;
     private final Button addToLibraryButton;
     private final Button refreshButton;
     private final TableView<Chapter> chaptersTable;
@@ -192,9 +191,6 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         readButton = new Button("Start Reading");
         readButton.setPrefWidth(150);
 
-        downloadButton = new Button("Download");
-        downloadButton.setPrefWidth(150);
-
         addToLibraryButton = new Button("Add to Library");
         addToLibraryButton.setPrefWidth(150);
 
@@ -202,7 +198,7 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         refreshButton.setPrefWidth(150);
 
         // Buttons layout
-        HBox buttonBox = new HBox(10, readButton, downloadButton);
+        HBox buttonBox = new HBox(10, readButton);
         HBox secondaryButtonBox = new HBox(10, addToLibraryButton, refreshButton);
 
         VBox buttonLayout = new VBox(10, buttonBox, secondaryButtonBox);
@@ -704,8 +700,6 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
                 updatingPagination = false;
             }
 
-            // NUCLEAR OPTION: Completely reset table state and force recreation of virtual
-            // flow
             chaptersTable.setItems(FXCollections.observableArrayList()); // Replace with empty list
             chaptersTable.refresh();
 
@@ -1132,10 +1126,6 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         return readButton;
     }
 
-    public Button getDownloadButton() {
-        return downloadButton;
-    }
-
     public Button getAddToLibraryButton() {
         return addToLibraryButton;
     }
@@ -1174,9 +1164,6 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         // Apply theme to buttons
         readButton.getStyleClass().removeAll("primary", "success", "warning");
         readButton.getStyleClass().add("primary");
-
-        downloadButton.getStyleClass().removeAll("primary", "success", "warning");
-        downloadButton.getStyleClass().add("success");
 
         addToLibraryButton.getStyleClass().removeAll("primary", "success", "warning");
 

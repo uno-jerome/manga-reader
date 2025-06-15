@@ -3,6 +3,7 @@ package com.mangareader.prototype.util;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -25,6 +26,13 @@ public class ImageCache {
     private final Map<String, Image> memoryCache = new ConcurrentHashMap<>();
     private final Path cacheDir;
     private final boolean diskCacheEnabled;
+
+    // Default dimensions for manga covers
+    private static final double DEFAULT_WIDTH = 180;
+    private static final double DEFAULT_HEIGHT = 270;
+    private static final boolean DEFAULT_PRESERVE_RATIO = true;
+    private static final boolean DEFAULT_SMOOTH = true;
+    private static final boolean DEFAULT_BACKGROUND_LOADING = true;
 
     private ImageCache() {
         // Initialize disk cache directory
@@ -49,28 +57,42 @@ public class ImageCache {
     }
 
     /**
-     * Get cached image or load and cache if not present
+     * Get cached image or load and cache if not present using default dimensions
      */
     public Image getImage(String url) {
+        return getImage(url, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    }
+
+    /**
+     * Get cached image or load and cache if not present with custom dimensions
+     */
+    public Image getImage(String url, double width, double height) {
         if (url == null || url.isEmpty()) {
-            return getPlaceholderImage("No+Cover");
+            return getPlaceholderImage("No+Cover", width, height);
         }
 
         // Validate URL format
         if (!isValidImageUrl(url)) {
             System.err.println("Invalid image URL: " + url);
-            return getPlaceholderImage("Invalid+URL");
+            return getPlaceholderImage("Invalid+URL", width, height);
         }
 
-        return memoryCache.computeIfAbsent(url, this::loadImageWithDiskCache);
+        String cacheKey = url + "_" + width + "x" + height;
+        return memoryCache.computeIfAbsent(cacheKey, k -> loadImageWithDiskCache(url, width, height));
     }
 
     /**
      * Get a placeholder image for errors or missing covers
      */
     public Image getPlaceholderImage(String text) {
-        String placeholderUrl = "https://via.placeholder.com/180x270?text=" + text;
-        return memoryCache.computeIfAbsent(placeholderUrl, this::loadImage);
+        return getPlaceholderImage(text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    }
+
+    public Image getPlaceholderImage(String text, double width, double height) {
+        String placeholderUrl = String.format("https://via.placeholder.com/%dx%d?text=%s",
+                (int) width, (int) height, text);
+        String cacheKey = placeholderUrl + "_" + width + "x" + height;
+        return memoryCache.computeIfAbsent(cacheKey, k -> loadImage(placeholderUrl, width, height));
     }
 
     /**
@@ -136,60 +158,20 @@ public class ImageCache {
         }
     }
 
-    private Image loadImageWithDiskCache(String url) {
-        if (!diskCacheEnabled) {
-            return loadImage(url);
-        }
-
+    private boolean isValidImageUrl(String url) {
         try {
-            String filename = getCacheFileName(url);
-            Path cachedFile = cacheDir.resolve(filename);
-
-            // Check if file exists in disk cache
-            if (Files.exists(cachedFile)) {
-                System.out.println("Loading image from disk cache: " + filename);
-
-                // Validate cached file size
-                if (Files.size(cachedFile) < 1024) {
-                    System.err.println("Cached file too small, removing: " + filename);
-                    Files.deleteIfExists(cachedFile);
-                    return downloadAndCacheImage(url, cachedFile);
-                }
-
-                try {
-                    Image cachedImage = new Image(new FileInputStream(cachedFile.toFile()));
-
-                    // Check if cached image is corrupted
-                    if (cachedImage.isError()) {
-                        System.err.println("Cached image is corrupted, re-downloading: " + filename);
-                        Files.deleteIfExists(cachedFile);
-                        Image newImage = downloadAndCacheImage(url, cachedFile);
-                        return newImage != null ? newImage : loadImage(url);
-                    }
-
-                    return cachedImage;
-                } catch (Exception e) {
-                    System.err.println("Error loading cached image, re-downloading: " + e.getMessage());
-                    Files.deleteIfExists(cachedFile);
-                    Image newImage = downloadAndCacheImage(url, cachedFile);
-                    return newImage != null ? newImage : loadImage(url);
-                }
-            } else {
-                // Download and cache to disk
-                System.out.println("Downloading and caching image: " + url);
-                Image image = downloadAndCacheImage(url, cachedFile);
-                return image != null ? image : loadImage(url);
-            }
+            URL testUrl = URI.create(url).toURL(); // Use modern URI-based URL creation
+            String protocol = testUrl.getProtocol();
+            return "http".equals(protocol) || "https".equals(protocol);
         } catch (Exception e) {
-            System.err.println("Error with disk cache, falling back to direct load: " + e.getMessage());
-            return loadImage(url);
+            return false;
         }
     }
 
-    private Image downloadAndCacheImage(String url, Path cachedFile) {
+    private Image downloadAndCacheImage(String url, Path cachedFile, double width, double height) {
         try {
-            // Download image to cache directory
-            URL imageUrl = new URL(url);
+            // Download image to cache directory using URI-based URL creation
+            URL imageUrl = URI.create(url).toURL();
             try (ReadableByteChannel rbc = Channels.newChannel(imageUrl.openStream());
                     FileOutputStream fos = new FileOutputStream(cachedFile.toFile())) {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -202,8 +184,10 @@ public class ImageCache {
                 return null;
             }
 
-            // Load and test the image
-            Image testImage = new Image(new FileInputStream(cachedFile.toFile()));
+            // Load and test the image - using file URI for local file
+            String fileUri = cachedFile.toUri().toString();
+            Image testImage = new Image(fileUri, width, height, DEFAULT_PRESERVE_RATIO, DEFAULT_SMOOTH,
+                    DEFAULT_BACKGROUND_LOADING);
 
             // Check if image loaded successfully
             if (testImage.isError()) {
@@ -225,6 +209,95 @@ public class ImageCache {
         }
     }
 
+    private Image loadImageWithDiskCache(String url, double width, double height) {
+        if (!diskCacheEnabled) {
+            return loadImage(url, width, height);
+        }
+
+        try {
+            String filename = getCacheFileName(url);
+            Path cachedFile = cacheDir.resolve(filename);
+
+            // Check if file exists in disk cache
+            if (Files.exists(cachedFile)) {
+                System.out.println("Loading image from disk cache: " + filename);
+
+                // Validate cached file size
+                if (Files.size(cachedFile) < 1024) {
+                    System.err.println("Cached file too small, removing: " + filename);
+                    Files.deleteIfExists(cachedFile);
+                    return downloadAndCacheImage(url, cachedFile, width, height);
+                }
+
+                try {
+                    // Use file URI for local file
+                    String fileUri = cachedFile.toUri().toString();
+                    Image cachedImage = new Image(fileUri, width, height, DEFAULT_PRESERVE_RATIO, DEFAULT_SMOOTH,
+                            DEFAULT_BACKGROUND_LOADING);
+
+                    // Check if cached image is corrupted
+                    if (cachedImage.isError()) {
+                        System.err.println("Cached image is corrupted, re-downloading: " + filename);
+                        Files.deleteIfExists(cachedFile);
+                        Image newImage = downloadAndCacheImage(url, cachedFile, width, height);
+                        return newImage != null ? newImage : loadImage(url, width, height);
+                    }
+
+                    return cachedImage;
+                } catch (Exception e) {
+                    System.err.println("Error loading cached image, re-downloading: " + e.getMessage());
+                    Files.deleteIfExists(cachedFile);
+                    Image newImage = downloadAndCacheImage(url, cachedFile, width, height);
+                    return newImage != null ? newImage : loadImage(url, width, height);
+                }
+            } else {
+                // Download and cache to disk
+                System.out.println("Downloading and caching image: " + url);
+                Image image = downloadAndCacheImage(url, cachedFile, width, height);
+                return image != null ? image : loadImage(url, width, height);
+            }
+        } catch (Exception e) {
+            System.err.println("Error with disk cache, falling back to direct load: " + e.getMessage());
+            return loadImage(url, width, height);
+        }
+    }
+
+    private Image loadImage(String url, double width, double height) {
+        try {
+            System.out.println("Loading and caching image: " + url);
+
+            // Create image with better error handling and size hints
+            Image image = new Image(url, width, height, DEFAULT_PRESERVE_RATIO, DEFAULT_SMOOTH,
+                    DEFAULT_BACKGROUND_LOADING);
+
+            // Add error listener to handle corruption issues
+            image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
+                if (newEx != null) {
+                    System.err.println("Image loading exception for " + url + ": " + newEx.getMessage());
+                    // Remove from cache if corrupted
+                    String cacheKey = url + "_" + width + "x" + height;
+                    memoryCache.remove(cacheKey);
+                }
+            });
+
+            // Add error property listener for JPEG corruption
+            image.errorProperty().addListener((obs, wasError, isError) -> {
+                if (isError) {
+                    System.err.println("Image error detected for " + url + " - likely corrupted JPEG data");
+                    // Remove from cache if corrupted
+                    String cacheKey = url + "_" + width + "x" + height;
+                    memoryCache.remove(cacheKey);
+                }
+            });
+
+            return image;
+        } catch (Exception e) {
+            System.err.println("Error loading image: " + url + " | " + e.getMessage());
+            return new Image("https://via.placeholder.com/180x270?text=Error",
+                    width, height, DEFAULT_PRESERVE_RATIO, DEFAULT_SMOOTH, DEFAULT_BACKGROUND_LOADING);
+        }
+    }
+
     private String getCacheFileName(String url) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -237,16 +310,6 @@ public class ImageCache {
         } catch (NoSuchAlgorithmException e) {
             // Fallback to simple hash
             return String.valueOf(url.hashCode()) + ".jpg";
-        }
-    }
-
-    private boolean isValidImageUrl(String url) {
-        try {
-            URL testUrl = new URL(url);
-            String protocol = testUrl.getProtocol();
-            return "http".equals(protocol) || "https".equals(protocol);
-        } catch (Exception e) {
-            return false;
         }
     }
 
@@ -263,38 +326,6 @@ public class ImageCache {
                     });
         } catch (IOException e) {
             System.err.println("Error clearing disk cache: " + e.getMessage());
-        }
-    }
-
-    private Image loadImage(String url) {
-        try {
-            System.out.println("Loading and caching image: " + url);
-
-            // Create image with better error handling
-            Image image = new Image(url, 180, 270, true, true, true); // Load in background with error handling
-
-            // Add error listener to handle corruption issues
-            image.exceptionProperty().addListener((obs, oldEx, newEx) -> {
-                if (newEx != null) {
-                    System.err.println("Image loading exception for " + url + ": " + newEx.getMessage());
-                    // Remove from cache if corrupted
-                    memoryCache.remove(url);
-                }
-            });
-
-            // Add error property listener for JPEG corruption
-            image.errorProperty().addListener((obs, wasError, isError) -> {
-                if (isError) {
-                    System.err.println("Image error detected for " + url + " - likely corrupted JPEG data");
-                    // Remove from cache if corrupted
-                    memoryCache.remove(url);
-                }
-            });
-
-            return image;
-        } catch (Exception e) {
-            System.err.println("Error loading image: " + url + " | " + e.getMessage());
-            return new Image("https://via.placeholder.com/180x270?text=Error");
         }
     }
 }

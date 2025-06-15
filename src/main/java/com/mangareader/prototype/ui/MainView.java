@@ -62,7 +62,6 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
             if (newVal != null && !programmaticSelection) {
                 switch (newVal.getValue()) {
                     case "Library" -> showLibraryView();
-                    case "Updates" -> showUpdatesView();
                     case "Settings" -> showSettingsView();
                     case "Add Series" -> showAddSeriesView(); // Direct navigation to AddSeriesView for browsing new
                                                               // manga
@@ -90,14 +89,6 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
         // Set up the "Add New Series" button to navigate to AddSeriesView
         currentLibraryView.setOnAddSeriesCallback(this::showAddSeriesView);
         contentArea.getChildren().add(currentLibraryView);
-    }
-
-    private void showUpdatesView() {
-        // Update sidebar selection to "Updates"
-        updateSidebarSelection("Updates");
-
-        contentArea.getChildren().clear();
-        contentArea.getChildren().add(new UpdatesView());
     }
 
     private void showSettingsView() {
