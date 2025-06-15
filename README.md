@@ -1,5 +1,5 @@
 # MangaReader 📚
-# PLEASE GO TO THE OTHER BRANCH OF THE REPOSITORY!
+# PLEASE GO TO THE OTHER [BRANCH](https://github.com/uno-jerome/manga-reader/tree/dev) OF THE REPOSITORY! I MESSED IT UP 🥀🥀
 Final Project Requirement
 
 [![Java Version](https://img.shields.io/badge/Java-17%2B-orange.svg)](https://www.oracle.com/java/)
