@@ -28,5 +28,4 @@ config/
 
 # Maven wrapper
 !.mvn/wrapper/maven-wrapper.jar
-".github/" 
-".github/" 
+.github/
