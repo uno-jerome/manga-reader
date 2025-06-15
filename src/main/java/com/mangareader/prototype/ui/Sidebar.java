@@ -31,12 +31,14 @@ public class Sidebar extends VBox implements ThemeManager.ThemeChangeListener {
         // Initialize theme manager
         themeManager = ThemeManager.getInstance();
 
-        // Set up the sidebar layout
+        // Set up the sidebar layout with consistent spacing
         setPrefWidth(250);
         setMinWidth(200);
         setMaxWidth(300);
-        updateSidebarTheme(); // Use theme colors instead of hardcoded white
-        setPadding(new Insets(10));
+
+        // Set consistent spacing before theme application
+        setSpacing(15); // Increased for better visual balance
+        setPadding(new Insets(15)); // Consistent padding for both themes
 
         // Initialize sources
         sources = new ArrayList<>();
@@ -55,6 +57,12 @@ public class Sidebar extends VBox implements ThemeManager.ThemeChangeListener {
                 navigationTree);
 
         VBox.setVgrow(navigationTree, Priority.ALWAYS);
+
+        // Apply CSS style class for consistent theming
+        getStyleClass().add("sidebar");
+
+        // Apply initial theme after all components are created
+        updateSidebarTheme();
 
         // Register theme listener after initialization is complete
         themeManager.addThemeChangeListener(this);
@@ -106,24 +114,21 @@ public class Sidebar extends VBox implements ThemeManager.ThemeChangeListener {
         setBackground(new Background(new BackgroundFill(Color.web(backgroundColor), null, null)));
         setBorder(new Border(new BorderStroke(Color.web(borderColor), BorderStrokeStyle.SOLID, null, null)));
 
-        // Update tree view theme
+        // Apply CSS style class instead of programmatic styling to maintain consistent
+        // spacing
+        getStyleClass().clear();
+        getStyleClass().add("sidebar");
+
+        // Update tree view theme - use CSS classes for consistency
         if (navigationTree != null) {
-            String textColor = themeManager.getTextColor();
-            navigationTree.setStyle(String.format(
-                    "-fx-background-color: %s; " +
-                            "-fx-text-fill: %s; " +
-                            "-fx-border-color: %s;",
-                    backgroundColor, textColor, borderColor));
+            navigationTree.getStyleClass().clear();
+            navigationTree.getStyleClass().add("tree-view");
         }
 
-        // Update library list theme
+        // Update library list theme - use CSS classes for consistency
         if (libraryList != null) {
-            String textColor = themeManager.getTextColor();
-            libraryList.setStyle(String.format(
-                    "-fx-background-color: %s; " +
-                            "-fx-text-fill: %s; " +
-                            "-fx-border-color: %s;",
-                    backgroundColor, textColor, borderColor));
+            libraryList.getStyleClass().clear();
+            libraryList.getStyleClass().add("list-view");
         }
     }
 }

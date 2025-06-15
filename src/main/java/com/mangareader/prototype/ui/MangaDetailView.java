@@ -116,11 +116,13 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
 
         setPadding(new Insets(20));
 
-        // Cover Image
+        // High-quality cover image
         coverImageView = new ImageView();
         coverImageView.setFitWidth(250);
         coverImageView.setFitHeight(350);
         coverImageView.setPreserveRatio(true);
+        coverImageView.setSmooth(true); // High-quality scaling
+        coverImageView.setCache(true); // Performance optimization
 
         // Create a clip for the ImageView to have rounded corners
         Rectangle clip = new Rectangle(250, 350);
@@ -207,11 +209,11 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         refreshButton = new Button("Refresh");
         refreshButton.setPrefWidth(150);
 
-        // Buttons layout
-        HBox buttonBox = new HBox(10, readButton);
-        HBox secondaryButtonBox = new HBox(10, addToLibraryButton, removeFromLibraryButton, refreshButton);
+        // Buttons layout - Put "Remove from Library" next to "Start Reading"
+        HBox primaryButtonBox = new HBox(10, readButton, removeFromLibraryButton);
+        HBox secondaryButtonBox = new HBox(10, addToLibraryButton, refreshButton);
 
-        VBox buttonLayout = new VBox(10, buttonBox, secondaryButtonBox);
+        VBox buttonLayout = new VBox(10, primaryButtonBox, secondaryButtonBox);
         buttonLayout.setAlignment(Pos.CENTER_LEFT);
         buttonLayout.setPadding(new Insets(15, 0, 15, 0));
 
@@ -1030,6 +1032,7 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         }
 
         try {
+            // Use high-quality settings for cover image loading
             Image image = new Image(manga.getCoverUrl(), 250, 350, true, true, true);
 
             image.errorProperty().addListener((obs, oldVal, newVal) -> {

@@ -35,6 +35,9 @@ public class MangaReaderView extends BorderPane {
     // Zoom memory - stores zoom levels per manga
     private static final Map<String, Double> MANGA_ZOOM_LEVELS = new HashMap<>();
 
+    // Reading mode memory - stores reading mode preferences per manga
+    private static final Map<String, Boolean> MANGA_READING_MODES = new HashMap<>();
+
     private final StackPane imageContainer;
     private final ScrollPane webtoonScrollPane;
     private final VBox webtoonContainer;
@@ -273,6 +276,9 @@ public class MangaReaderView extends BorderPane {
     private void toggleReadingMode() {
         isWebtoonMode = !isWebtoonMode;
 
+        // Save the user's reading mode preference for this manga
+        saveReadingMode();
+
         if (isWebtoonMode) {
             // Switch to webtoon mode
             modeToggleButton.setText("📜 Webtoon");
@@ -407,15 +413,24 @@ public class MangaReaderView extends BorderPane {
         }
 
         // Auto-detect reading mode based on chapter format OR manga genres
+        // But first check if user has a saved preference for this manga
         boolean shouldUseWebtoonMode = false;
 
-        // First check chapter's reading format
-        if (chapter.getReadingFormat() != null && "webtoon".equals(chapter.getReadingFormat())) {
-            shouldUseWebtoonMode = true;
+        if (currentMangaId != null && MANGA_READING_MODES.containsKey(currentMangaId)) {
+            // User has a saved reading mode preference - use it
+            shouldUseWebtoonMode = MANGA_READING_MODES.get(currentMangaId);
+            System.out.println(
+                    "Using saved reading mode preference: " + (shouldUseWebtoonMode ? "Webtoon" : "Traditional"));
         } else {
-            // Auto-detect based on manga genres if we have manga ID
-            if (currentMangaId != null) {
-                shouldUseWebtoonMode = detectWebtoonFromGenres();
+            // No saved preference, use auto-detection
+            // First check chapter's reading format
+            if (chapter.getReadingFormat() != null && "webtoon".equals(chapter.getReadingFormat())) {
+                shouldUseWebtoonMode = true;
+            } else {
+                // Auto-detect based on manga genres if we have manga ID
+                if (currentMangaId != null) {
+                    shouldUseWebtoonMode = detectWebtoonFromGenres();
+                }
             }
         }
 
@@ -772,6 +787,9 @@ public class MangaReaderView extends BorderPane {
 
         // Restore zoom level for this manga
         restoreZoomLevel();
+
+        // Restore reading mode preference for this manga
+        restoreReadingMode();
     }
 
     /**
@@ -784,6 +802,15 @@ public class MangaReaderView extends BorderPane {
     }
 
     /**
+     * Save reading mode preference for current manga
+     */
+    private void saveReadingMode() {
+        if (currentMangaId != null) {
+            MANGA_READING_MODES.put(currentMangaId, isWebtoonMode);
+        }
+    }
+
+    /**
      * Restore zoom level for current manga
      */
     private void restoreZoomLevel() {
@@ -792,6 +819,32 @@ public class MangaReaderView extends BorderPane {
             // Set zoom level and update slider
             zoomLevel = savedZoom;
             Platform.runLater(() -> zoomSlider.setValue(savedZoom));
+        }
+    }
+
+    /**
+     * Restore reading mode preference for current manga
+     */
+    private void restoreReadingMode() {
+        if (currentMangaId != null && MANGA_READING_MODES.containsKey(currentMangaId)) {
+            boolean savedWebtoonMode = MANGA_READING_MODES.get(currentMangaId);
+
+            // Apply the saved reading mode if it's different from current
+            if (savedWebtoonMode != isWebtoonMode) {
+                isWebtoonMode = savedWebtoonMode;
+                updateModeToggleButton();
+            }
+        }
+    }
+
+    /**
+     * Update the mode toggle button text and appearance
+     */
+    private void updateModeToggleButton() {
+        if (isWebtoonMode) {
+            modeToggleButton.setText("📜 Webtoon");
+        } else {
+            modeToggleButton.setText("📖 Traditional");
         }
     }
 

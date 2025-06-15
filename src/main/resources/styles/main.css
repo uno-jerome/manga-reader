@@ -459,3 +459,59 @@
 .add-series-dialog .button-bar {
     -fx-background-color: #f8f9fa;
 }
+
+/* Sidebar specific styling - Light theme */
+.sidebar {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-padding: 15;
+    -fx-spacing: 10;
+}
+
+.sidebar .tree-view {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+    -fx-font-size: 14px;
+}
+
+.sidebar .tree-view .tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-padding: 6 12;
+    -fx-background-radius: 4;
+}
+
+.sidebar .tree-view .tree-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.sidebar .tree-view .tree-cell:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+
+.sidebar .list-view {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+    -fx-font-size: 14px;
+}
+
+.sidebar .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-padding: 6 12;
+    -fx-background-radius: 4;
+}
+
+.sidebar .list-view .list-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.sidebar .list-view .list-cell:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
