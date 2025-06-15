@@ -24,6 +24,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeListener {
     private final LibraryService libraryService;
@@ -214,23 +215,32 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
     }
 
     private VBox createMangaCover(Manga manga) {
-        // Cover image
+        // High-quality cover image
         ImageView imageView = new ImageView();
         imageView.setFitWidth(CARD_WIDTH);
         imageView.setFitHeight(CARD_HEIGHT);
         imageView.setPreserveRatio(false);
+        imageView.setSmooth(true); // High-quality scaling
+        imageView.setCache(true); // Performance optimization
 
         StackPane imageContainer = new StackPane(imageView);
 
-        // Use theme-aware colors for image container
+        // Add rounded clipping for modern look
+        Rectangle clip = new Rectangle(CARD_WIDTH, CARD_HEIGHT);
+        clip.setArcWidth(12);
+        clip.setArcHeight(12);
+        imageContainer.setClip(clip);
+
+        // Container styling
         String imageBackgroundColor = themeManager.getSecondaryBackgroundColor();
         String borderColor = themeManager.getBorderColor();
         imageContainer.setStyle(String.format(
                 "-fx-background-color: %s; " +
                         "-fx-border-color: %s; " +
                         "-fx-border-width: 1; " +
-                        "-fx-background-radius: 8; " +
-                        "-fx-border-radius: 8;",
+                        "-fx-background-radius: 12; " +
+                        "-fx-border-radius: 12; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);",
                 imageBackgroundColor, borderColor));
 
         // Load cover image using cache
@@ -249,7 +259,7 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
             imageView.setImage(errorImage);
         }
 
-        // Title and info with theme-aware colors
+        // Theme colors
         String textColor = themeManager.getTextColor();
         String secondaryTextColor = themeManager.isDarkTheme() ? "#b0b0b0" : "#666666";
 
@@ -284,13 +294,10 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
                         // Show current reading position within the current chapter
                         if (position.isPresent()) {
                             LibraryService.ReadingPosition pos = position.get();
-                            int currentPage = pos.getPageNumber() + 1;
                             int totalPages = pos.getTotalPages();
 
                             if (totalPages > 0) {
-                                // Calculate percentage completed in current chapter
-
-                                // Show which chapter you're currently reading and remaining percentage
+                                // Show which chapter you're currently reading
                                 progressText += String.format(" (Chapter %d)",
                                         chaptersRead + 1);
                             }
@@ -334,7 +341,7 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
 
         VBox box = new VBox(0, imageContainer, infoBox);
 
-        // Use theme-aware colors for card background
+        // Card styling
         String cardBackgroundColor = themeManager.getSecondaryBackgroundColor();
         box.setStyle(String.format(
                 "-fx-background-color: %s; " +
@@ -349,7 +356,7 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
             }
         });
 
-        // Hover effect with theme-aware colors
+        // Hover effects
         box.setOnMouseEntered(e -> box.setStyle(String.format(
                 "-fx-background-color: %s; " +
                         "-fx-background-radius: 8; " +

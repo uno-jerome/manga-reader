@@ -134,7 +134,7 @@ public class MangaDetailView extends BorderPane implements ThemeManager.ThemeCha
         String placeholderUrl = "https://via.placeholder.com/250x350/f8f9fa/6c757d?text=No+Cover";
         coverImageView.setImage(new Image(placeholderUrl, true));
 
-        // Enhanced Labels with styling
+        // Labels with styling
         titleLabel = new Label();
         titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-wrap-text: true;");
         titleLabel.setWrapText(true);

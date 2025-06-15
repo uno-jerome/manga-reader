@@ -12,7 +12,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -28,9 +27,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class AddSeriesModal extends Dialog<Manga> {
+public class AddSeriesModal extends Dialog<Manga> implements ThemeManager.ThemeChangeListener {
 
     private final MangaService mangaService;
+    private final ThemeManager themeManager;
     private Manga mangaToAdd;
 
     private final ImageView coverImageView;
@@ -40,12 +40,13 @@ public class AddSeriesModal extends Dialog<Manga> {
     private final TextField artistsField;
     private final FlowPane tagsFlowPane;
     private final TextField addTagField;
-    private final ComboBox<String> languageComboBox;
-    private final ComboBox<String> statusComboBox;
+    private final TextField languageField; // Changed from ComboBox since it's read-only
+    private final TextField statusField; // Changed from ComboBox since it's read-only
     private TextField coverUrlField; // Added coverUrlField as a class member
 
     public AddSeriesModal(Manga manga) {
         this.mangaService = new DefaultMangaServiceImpl();
+        this.themeManager = ThemeManager.getInstance();
         this.mangaToAdd = manga;
 
         // Debug output for manga data
@@ -63,17 +64,32 @@ public class AddSeriesModal extends Dialog<Manga> {
         dialogPane.getStyleClass().add("add-series-dialog");
         dialogPane.setPrefWidth(900);
         dialogPane.setPrefHeight(700);
-        dialogPane.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
+
+        // Apply current theme stylesheet without leaking this
+        String cssPath = themeManager.getCurrentTheme().getCssPath();
+        try {
+            String cssUrl = getClass().getResource(cssPath).toExternalForm();
+            dialogPane.getStylesheets().add(cssUrl);
+        } catch (Exception e) {
+            System.err.println("Error loading theme CSS for modal: " + e.getMessage());
+            // Fallback to light theme
+            try {
+                String fallbackUrl = getClass().getResource("/styles/main.css").toExternalForm();
+                dialogPane.getStylesheets().add(fallbackUrl);
+            } catch (Exception fallbackError) {
+                System.err.println("Error loading fallback CSS: " + fallbackError.getMessage());
+            }
+        }
 
         // --- UI Components --- //
 
-        // Cover Image
+        // Cover Image with high quality settings
         coverImageView = new ImageView();
         coverImageView.setFitWidth(200);
         coverImageView.setFitHeight(300);
         coverImageView.setPreserveRatio(true);
-        coverImageView.setStyle(
-                "-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);");
+        coverImageView.setSmooth(true); // Enable smooth scaling for better quality
+        coverImageView.setCache(true); // Cache the image for better performance
 
         // Always set a placeholder first
         String placeholderUrl = "https://via.placeholder.com/200x300/f8f9fa/6c757d?text=No+Cover";
@@ -107,7 +123,6 @@ public class AddSeriesModal extends Dialog<Manga> {
         titleField.setPrefColumnCount(30);
         titleField.setEditable(false); // Make title read-only
         titleField.setFocusTraversable(false);
-        titleField.setStyle("-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-text-fill: #495057;");
 
         // Description Area
         descriptionArea = new TextArea(manga.getDescription());
@@ -117,15 +132,14 @@ public class AddSeriesModal extends Dialog<Manga> {
         descriptionArea.setPrefColumnCount(30);
         descriptionArea.setEditable(false); // Make description read-only
         descriptionArea.setFocusTraversable(false);
-        descriptionArea.setStyle("-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-text-fill: #495057;");
 
         // Authors Field
         String authorText = manga.getAuthor() != null ? manga.getAuthor() : "";
         authorsField = new TextField(authorText);
         authorsField.setPromptText("Author(s)");
         authorsField.setPrefColumnCount(30);
-        authorsField.setStyle(
-                "-fx-background-color: white; -fx-border-color: #007bff; -fx-border-width: 2; -fx-prompt-text-fill: #6c757d;");
+        authorsField.setEditable(false); // Make non-editable since data is from MangaDex
+        authorsField.setFocusTraversable(false);
         System.out.println("Setting author field text: " + authorText);
 
         // Artists Field
@@ -133,27 +147,28 @@ public class AddSeriesModal extends Dialog<Manga> {
         artistsField = new TextField(artistText);
         artistsField.setPromptText("Artist(s)");
         artistsField.setPrefColumnCount(30);
-        artistsField.setStyle(
-                "-fx-background-color: white; -fx-border-color: #007bff; -fx-border-width: 2; -fx-prompt-text-fill: #6c757d;");
+        artistsField.setEditable(false); // Make non-editable since data is from MangaDex
+        artistsField.setFocusTraversable(false);
         System.out.println("Setting artist field text: " + artistText);
 
-        // Tags FlowPane (for displaying chips)
-        tagsFlowPane = new FlowPane(8, 8);
-        tagsFlowPane.setPadding(new Insets(10));
+        // Tags FlowPane (for displaying chips) - Auto-adjusting layout
+        tagsFlowPane = new FlowPane(5, 5); // Reduced spacing for tighter layout
+        tagsFlowPane.setPadding(new Insets(5)); // Reduced padding
 
+        // Remove fixed height constraints to let content determine size
         tagsFlowPane.setPrefWrapLength(400);
-        tagsFlowPane.setPrefHeight(60);
-        tagsFlowPane.setMinHeight(60);
         tagsFlowPane.setMaxWidth(Double.MAX_VALUE);
         if (manga.getGenres() != null) {
             manga.getGenres().forEach(this::addTagChip);
         }
         tagsFlowPane.setDisable(true); // Make tags field non-editable
 
-        // Wrap tagsFlowPane in a ScrollPane
+        // Wrap tagsFlowPane in a ScrollPane with dynamic height
         ScrollPane tagsScrollPane = new ScrollPane(tagsFlowPane);
         tagsScrollPane.setFitToWidth(true);
-        tagsScrollPane.setPrefHeight(120); // Limit height to prevent overflow
+        // Calculate height based on tag content (approximately 30px per row + padding)
+        double estimatedHeight = calculateTagsHeight();
+        tagsScrollPane.setPrefHeight(Math.max(40, Math.min(estimatedHeight, 120))); // Min 40px, max 120px
         tagsScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
         tagsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         tagsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -176,19 +191,19 @@ public class AddSeriesModal extends Dialog<Manga> {
         });
         addTagField.setVisible(false); // Hide add tag field when tags are read-only
 
-        // Language ComboBox
-        languageComboBox = new ComboBox<>();
-        languageComboBox.getItems().addAll("English", "Japanese", "Korean", "Chinese");
-        languageComboBox.setValue(manga.getLanguage() != null ? manga.getLanguage() : "English");
-        languageComboBox.setPromptText("Language");
-        languageComboBox.setStyle("-fx-background-color: white; -fx-border-color: #ced4da;");
+        // Language Field (read-only, no dropdown needed)
+        languageField = new TextField(manga.getLanguage() != null ? manga.getLanguage() : "English");
+        languageField.setPromptText("Language");
+        languageField.setEditable(false);
+        languageField.setFocusTraversable(false);
+        languageField.setAlignment(Pos.CENTER_LEFT); // Better text alignment
 
-        // Status ComboBox
-        statusComboBox = new ComboBox<>();
-        statusComboBox.getItems().addAll("Ongoing", "Completed", "Hiatus", "Cancelled");
-        statusComboBox.setValue(manga.getStatus() != null ? manga.getStatus() : "Ongoing");
-        statusComboBox.setPromptText("Status");
-        statusComboBox.setStyle("-fx-background-color: white; -fx-border-color: #ced4da;");
+        // Status Field (read-only, no dropdown needed)
+        statusField = new TextField(manga.getStatus() != null ? manga.getStatus() : "Ongoing");
+        statusField.setPromptText("Status");
+        statusField.setEditable(false);
+        statusField.setFocusTraversable(false);
+        statusField.setAlignment(Pos.CENTER_LEFT); // Better text alignment
 
         // --- Layout --- //
         GridPane contentGrid = new GridPane();
@@ -205,7 +220,6 @@ public class AddSeriesModal extends Dialog<Manga> {
         VBox coverContainer = new VBox(10);
         coverContainer.setAlignment(Pos.CENTER);
         Label coverLabel = new Label("Cover Image");
-        coverLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #495057;");
         coverContainer.getChildren().addAll(coverLabel, coverImageView);
 
         // Create coverUrlField as a class-level field so it can be updated from image
@@ -214,29 +228,19 @@ public class AddSeriesModal extends Dialog<Manga> {
         coverUrlField.setEditable(false);
         coverUrlField.setFocusTraversable(false);
         coverUrlField.setPromptText("Cover URL");
-        coverUrlField.setStyle(
-                "-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-text-fill: #6c757d; -fx-font-size: 11px;");
 
         leftColumn.getChildren().addAll(coverContainer, coverUrlField);
         leftColumn.setPrefWidth(250);
         leftColumn.setMaxWidth(250);
 
         // Right side: Details fields
-        // Create styled labels
         Label titleLabel = new Label("Title");
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
         Label descLabel = new Label("Description");
-        descLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
         Label authorLabel = new Label("Author(s)");
-        authorLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #007bff;");
         Label artistLabel = new Label("Artist(s)");
-        artistLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #007bff;");
         Label tagsLabel = new Label("Tags");
-        tagsLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
         Label langLabel = new Label("Language");
-        langLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
         Label statusLabel = new Label("Status");
-        statusLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
 
         detailsGrid.add(titleLabel, 0, 0);
         detailsGrid.add(titleField, 1, 0);
@@ -249,9 +253,9 @@ public class AddSeriesModal extends Dialog<Manga> {
         detailsGrid.add(tagsLabel, 0, 4);
         detailsGrid.add(tagsScrollPane, 1, 4);
         detailsGrid.add(langLabel, 0, 5);
-        detailsGrid.add(languageComboBox, 1, 5);
+        detailsGrid.add(languageField, 1, 5);
         detailsGrid.add(statusLabel, 0, 6);
-        detailsGrid.add(statusComboBox, 1, 6);
+        detailsGrid.add(statusField, 1, 6);
 
         ColumnConstraints labelCol = new ColumnConstraints();
         labelCol.setMinWidth(90);
@@ -282,13 +286,28 @@ public class AddSeriesModal extends Dialog<Manga> {
             }
             return null;
         });
+
+        // Initialize theme styling after all components are created
+        initializeTheme();
+
+        updateTagChipsTheme();
     }
 
     private void addTagChip(String tagText) {
         Label tagLabel = new Label(tagText);
         tagLabel.getStyleClass().add("tag-chip");
-        tagLabel.setStyle(
-                "-fx-background-color: #e7f3ff; -fx-padding: 6 12; -fx-background-radius: 18; -fx-font-size: 12px; -fx-text-fill: #0066cc; -fx-border-color: #b3d9ff; -fx-border-width: 1; -fx-border-radius: 18;");
+
+        boolean isDark = themeManager.isDarkTheme();
+        String chipBg = isDark ? "#4a4a4a" : "#e7f3ff";
+        String chipText = isDark ? "#87ceeb" : "#0066cc";
+        String chipBorder = isDark ? "#5a5a5a" : "#b3d9ff";
+
+        tagLabel.setStyle(String.format(
+                "-fx-background-color: %s; -fx-padding: 6 12; -fx-background-radius: 18; " +
+                        "-fx-font-size: 12px; -fx-text-fill: %s; -fx-border-color: %s; " +
+                        "-fx-border-width: 1; -fx-border-radius: 18;",
+                chipBg, chipText, chipBorder));
+
         // Remove close button for read-only tags
         HBox tagChip = new HBox(5, tagLabel);
         tagChip.setAlignment(Pos.CENTER_LEFT);
@@ -297,11 +316,8 @@ public class AddSeriesModal extends Dialog<Manga> {
     }
 
     private void updateMangaObject() {
-        // Do not update title, description, or genres (tags) since they are read-only
-        mangaToAdd.setAuthor(authorsField.getText());
-        mangaToAdd.setArtist(artistsField.getText());
-        mangaToAdd.setLanguage(languageComboBox.getValue());
-        mangaToAdd.setStatus(statusComboBox.getValue());
+        // All fields are read-only - data comes from MangaDx source
+        System.out.println("Manga object preserved - all data from MangaDx source");
     }
 
     public Optional<Manga> showAndAwaitResult() {
@@ -558,5 +574,189 @@ public class AddSeriesModal extends Dialog<Manga> {
             javafx.application.Platform
                     .runLater(() -> coverImageView.setImage(new Image(placeholderUrl, true)));
         }
+    }
+
+    /**
+     * Apply the current theme stylesheet to the dialog
+     */
+    private void applyCurrentTheme(DialogPane dialogPane) {
+        dialogPane.getStylesheets().clear();
+        String cssPath = themeManager.getCurrentTheme().getCssPath();
+        try {
+            String cssUrl = getClass().getResource(cssPath).toExternalForm();
+            dialogPane.getStylesheets().add(cssUrl);
+        } catch (Exception e) {
+            System.err.println("Error loading theme CSS for modal: " + e.getMessage());
+            // Fallback to light theme
+            try {
+                String fallbackUrl = getClass().getResource("/styles/main.css").toExternalForm();
+                dialogPane.getStylesheets().add(fallbackUrl);
+            } catch (Exception fallbackError) {
+                System.err.println("Error loading fallback CSS: " + fallbackError.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Apply theme-aware styling to all UI components
+     */
+    private void applyThemeStyles() {
+        boolean isDark = themeManager.isDarkTheme();
+
+        // Update dialog pane background
+        DialogPane dialogPane = getDialogPane();
+        String dialogBg = isDark ? "#2b2b2b" : "#ffffff";
+        dialogPane.setStyle("-fx-background-color: " + dialogBg + ";");
+
+        // Update cover image view
+        String coverBg = isDark ? "#3c3c3c" : "#f8f9fa";
+        String coverBorder = isDark ? "#5a5a5a" : "#dee2e6";
+        coverImageView.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-border-width: 1; " +
+                        "-fx-border-radius: 8; -fx-background-radius: 8; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);",
+                coverBg, coverBorder));
+
+        // Read-only field styling
+        String readOnlyBg = isDark ? "#3c3c3c" : "#f8f9fa";
+        String readOnlyBorder = isDark ? "#5a5a5a" : "#dee2e6";
+        String readOnlyText = isDark ? "#b0b0b0" : "#495057";
+
+        titleField.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 12;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        descriptionArea.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 12;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        // Author and artist fields with better styling
+        authorsField.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 12;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        artistsField.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 12;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        // Language and status fields with modern styling and proper alignment
+        languageField.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 12; -fx-alignment: center-left;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        statusField.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 8 12; -fx-alignment: center-left;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        // Update cover URL field with modern styling
+        coverUrlField.setStyle(String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; -fx-text-fill: %s; " +
+                        "-fx-font-size: 11px; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 6 10;",
+                readOnlyBg, readOnlyBorder, readOnlyText));
+
+        // Update labels
+        updateLabelsTheme();
+
+        // Update tag chips
+        updateTagChipsTheme();
+    }
+
+    /**
+     * Update label styling for current theme
+     */
+    private void updateLabelsTheme() {
+        String textColor = themeManager.getTextColor();
+        String primaryColor = themeManager.isDarkTheme() ? "#0096c9" : "#007bff";
+
+        // Find and update all labels in the dialog
+        DialogPane dialogPane = getDialogPane();
+        updateLabelsInNode(dialogPane, textColor, primaryColor);
+    }
+
+    /**
+     * Recursively update labels in a node
+     */
+    private void updateLabelsInNode(javafx.scene.Node node, String textColor, String primaryColor) {
+        if (node instanceof Label) {
+            Label label = (Label) node;
+            // Use consistent styling for all labels
+            label.setStyle(String.format("-fx-font-weight: bold; -fx-text-fill: %s;", textColor));
+        } else if (node instanceof javafx.scene.Parent) {
+            javafx.scene.Parent parent = (javafx.scene.Parent) node;
+            for (javafx.scene.Node child : parent.getChildrenUnmodifiable()) {
+                updateLabelsInNode(child, textColor, primaryColor);
+            }
+        }
+    }
+
+    /**
+     * Update tag chip styling for current theme
+     */
+    private void updateTagChipsTheme() {
+        boolean isDark = themeManager.isDarkTheme();
+        String chipBg = isDark ? "#4a4a4a" : "#e7f3ff";
+        String chipText = isDark ? "#87ceeb" : "#0066cc";
+        String chipBorder = isDark ? "#5a5a5a" : "#b3d9ff";
+
+        tagsFlowPane.getChildren().forEach(node -> {
+            if (node instanceof HBox) {
+                HBox chipContainer = (HBox) node;
+                chipContainer.getChildren().forEach(child -> {
+                    if (child instanceof Label) {
+                        Label tagLabel = (Label) child;
+                        tagLabel.setStyle(String.format(
+                                "-fx-background-color: %s; -fx-padding: 6 12; -fx-background-radius: 18; " +
+                                        "-fx-font-size: 12px; -fx-text-fill: %s; -fx-border-color: %s; " +
+                                        "-fx-border-width: 1; -fx-border-radius: 18;",
+                                chipBg, chipText, chipBorder));
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void onThemeChanged(ThemeManager.Theme newTheme) {
+        Platform.runLater(() -> {
+            // Update dialog stylesheet
+            applyCurrentTheme(getDialogPane());
+            // Update component styles
+            applyThemeStyles();
+        });
+    }
+
+    /**
+     * Initialize the dialog with current theme and apply styles
+     */
+    private void initializeTheme() {
+        // Register for theme changes
+        themeManager.addThemeChangeListener(this);
+
+        Platform.runLater(() -> applyThemeStyles());
+    }
+
+    /**
+     * Calculate estimated height needed for tag chips based on number of tags
+     * This helps auto-adjust the tags container height
+     */
+    private double calculateTagsHeight() {
+        if (mangaToAdd.getGenres() == null || mangaToAdd.getGenres().isEmpty()) {
+            return 40; // Minimum height for empty state
+        }
+
+        // Estimate: each tag chip is ~25px tall, ~80px wide on average
+        // Container is ~400px wide, so roughly 4-5 tags per row
+        int tagCount = mangaToAdd.getGenres().size();
+        int tagsPerRow = 4; // Conservative estimate
+        int estimatedRows = Math.max(1, (tagCount + tagsPerRow - 1) / tagsPerRow); // Ceiling division
+
+        // Each row: 25px tag height + 5px gap + padding
+        return (estimatedRows * 30) + 20; // 20px for container padding
     }
 }
