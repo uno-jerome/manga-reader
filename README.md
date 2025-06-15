@@ -33,7 +33,7 @@ Final Project Requirement
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/manga-reader.git
+   git clone [https://github.com/yourusername/manga-reader.git](https://github.com/uno-jerome/manga-reader.git)
    cd manga-reader
    ```
 
