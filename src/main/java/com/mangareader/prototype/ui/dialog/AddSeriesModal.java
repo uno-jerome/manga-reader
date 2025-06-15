@@ -1,4 +1,4 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.dialog;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.mangareader.prototype.model.Manga;
 import com.mangareader.prototype.service.MangaService;
 import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
+import com.mangareader.prototype.ui.component.ThemeManager;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -316,8 +317,8 @@ public class AddSeriesModal extends Dialog<Manga> implements ThemeManager.ThemeC
     }
 
     private void updateMangaObject() {
-        // All fields are read-only - data comes from MangaDx source
-        System.out.println("Manga object preserved - all data from MangaDx source");
+        // All fields are read-only - data comes from MangaDex source
+        System.out.println("Manga object preserved - all data from MangaDex source");
     }
 
     public Optional<Manga> showAndAwaitResult() {

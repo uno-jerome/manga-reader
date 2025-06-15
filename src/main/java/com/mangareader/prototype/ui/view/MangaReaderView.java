@@ -1,4 +1,4 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.view;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +59,7 @@ public class MangaReaderView extends BorderPane {
     private final ExecutorService executorService;
 
     private Chapter currentChapter;
-    private String currentMangaId; // Add manga ID tracking for progress saving
+    private String currentMangaId;
     private List<String> pageUrls;
     private int currentPageIndex = 0;
     private double zoomLevel = 1.0;
@@ -230,22 +230,21 @@ public class MangaReaderView extends BorderPane {
 
         controlsBox.getChildren().addAll(
                 backButton,
-                new Label("   "), // Spacer
+                new Label("   "),
                 modeToggleButton,
-                new Label(" "), // Small spacer
+                new Label(" "),
                 prevChapterButton,
-                new Label(" "), // Small spacer
+                new Label(" "),
                 prevButton, pageInfoLabel, nextButton,
-                new Label(" "), // Small spacer
+                new Label(" "),
                 nextChapterButton,
-                new Label("   "), // Spacer
+                new Label("   "),
                 zoomLabel, zoomSlider, autoFitButton);
 
         // Layout
         setCenter(imageContainer);
         setBottom(controlsBox);
 
-        // Keyboard event handling
         setFocusTraversable(true);
         setOnKeyPressed(this::handleKeyPressed);
 
@@ -256,7 +255,6 @@ public class MangaReaderView extends BorderPane {
             }
         });
 
-        // Listen for window resize to update image size
         imageContainer.widthProperty().addListener((obs, oldWidth, newWidth) -> {
             Platform.runLater(this::updateImageSize);
         });
@@ -334,8 +332,6 @@ public class MangaReaderView extends BorderPane {
                         double baseWidth = Math.max(600, containerWidth * 0.85);
                         double targetWidth = baseWidth * zoomLevel;
 
-                        // Prevent excessive zoom that could make navigation impossible - stricter
-                        // limits
                         double maxAllowedWidth = containerWidth * 2.0; // Reduced from 2.5 for better control
                         if (targetWidth > maxAllowedWidth) {
                             targetWidth = maxAllowedWidth;

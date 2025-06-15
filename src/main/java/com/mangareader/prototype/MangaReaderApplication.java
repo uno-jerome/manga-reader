@@ -1,7 +1,7 @@
 package com.mangareader.prototype;
 
-import com.mangareader.prototype.ui.MainView;
-import com.mangareader.prototype.ui.ThemeManager;
+import com.mangareader.prototype.ui.component.ThemeManager;
+import com.mangareader.prototype.ui.view.MainView;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

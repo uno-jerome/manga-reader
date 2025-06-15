@@ -1,5 +1,6 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.view;
 
+import com.mangareader.prototype.ui.component.ThemeManager;
 import com.mangareader.prototype.util.ImageCache;
 
 import javafx.application.Platform;

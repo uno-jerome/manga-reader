@@ -220,7 +220,7 @@ public class MangaDexSource implements MangaSource {
 
     // Helper method to convert genre name to MangaDex genre UUID
     private String getGenreIdByName(String genreName) { // These are the actual UUID-based tag IDs from MangaDex API
-        // Reference: https://api.mangadx.org/manga/tag
+        // Reference: https://api.mangadex.org/manga/tag
         switch (genreName.toLowerCase()) {
             case "action":
                 return "391b0423-d847-456f-aff0-8b0cfc03066b";

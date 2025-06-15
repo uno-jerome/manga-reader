@@ -93,7 +93,7 @@ manga-reader/
 
 ### Core Components
 
-- **🎯 MangaSource**: Interface for manga data providers (MangaDx, etc.)
+- **🎯 MangaSource**: Interface for manga data providers (MangaDex, etc.)
 - **📊 MangaService**: Business logic for manga operations and library management
 - **🎨 UI Components**: Modular JavaFX views for different application screens
 - **💾 Data Models**: POJOs representing manga, chapters, and search results

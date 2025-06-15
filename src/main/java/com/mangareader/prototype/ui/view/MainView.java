@@ -1,4 +1,4 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.view;
 
 import java.util.List;
 
@@ -8,7 +8,8 @@ import com.mangareader.prototype.service.LibraryService;
 import com.mangareader.prototype.service.MangaService;
 import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
 import com.mangareader.prototype.service.impl.LibraryServiceImpl;
-
+import com.mangareader.prototype.ui.component.Sidebar;
+import com.mangareader.prototype.ui.component.ThemeManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.ToolBar;
@@ -29,10 +30,9 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     private final StackPane contentArea;
     private final ToolBar topBar;
     private final ThemeManager themeManager;
-    private LibraryView currentLibraryView; // Track current library view for refreshing
-    private boolean programmaticSelection = false; // Flag to prevent listener loops
+    private LibraryView currentLibraryView;
+    private boolean programmaticSelection = false;
 
-    // Track navigation source for proper back navigation
     private enum NavigationSource {
         ADD_SERIES, LIBRARY
     }
@@ -40,63 +40,49 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     private NavigationSource currentNavigationSource = NavigationSource.ADD_SERIES;
 
     public MainView() {
-        // Initialize theme manager
         themeManager = ThemeManager.getInstance();
 
-        // Initialize components
         sidebar = new Sidebar();
         contentArea = new StackPane();
         topBar = createTopBar();
 
-        // Set up the layout
         setLeft(sidebar);
         setCenter(contentArea);
         setTop(topBar);
 
-        // Style the main container using theme colors
         String backgroundColor = themeManager.getBackgroundColor();
         setBackground(new Background(new BackgroundFill(Color.web(backgroundColor), null, null)));
         setPadding(new Insets(0));
 
-        // Apply initial theme to toolbar
         updateToolbarTheme();
 
-        // Show LibraryView by default
         showLibraryView();
 
-        // Listen for navigation selection
         sidebar.getNavigationTree().getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !programmaticSelection) {
                 switch (newVal.getValue()) {
                     case "Library" -> showLibraryView();
                     case "Settings" -> showSettingsView();
-                    case "Add Series" -> showAddSeriesView(); // Direct navigation to AddSeriesView for browsing new
-                                                              // manga
-                    // Add more cases as needed
+                    case "Add Series" -> showAddSeriesView();
                 }
             }
         });
 
-        // Register theme listener after all initialization is complete
         themeManager.addThemeChangeListener(this);
     }
 
     private ToolBar createTopBar() {
         ToolBar toolBar = new ToolBar();
-        // Removed search field - search functionality moved to individual views
         return toolBar;
     }
 
     private void showLibraryView() {
-        // Update sidebar selection to "Library"
         updateSidebarSelection("Library");
 
-        // Set navigation source
         currentNavigationSource = NavigationSource.LIBRARY;
 
         contentArea.getChildren().clear();
         currentLibraryView = new LibraryView(this::showMangaDetailViewFromLibrary);
-        // Set up the "Add New Series" button to navigate to AddSeriesView
         currentLibraryView.setOnAddSeriesCallback(this::showAddSeriesView);
         contentArea.getChildren().add(currentLibraryView);
     }
@@ -110,7 +96,6 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     }
 
     private void showSettingsView() {
-        // Update sidebar selection to "Settings"
         updateSidebarSelection("Settings");
 
         contentArea.getChildren().clear();
@@ -118,36 +103,29 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     }
 
     private void showAddSeriesView() {
-        // Update sidebar selection to "Add Series"
         updateSidebarSelection("Add Series");
 
-        // Set navigation source
         currentNavigationSource = NavigationSource.ADD_SERIES;
 
         contentArea.getChildren().clear();
-        // Pass a callback to AddSeriesView to handle manga selection
         contentArea.getChildren().add(new AddSeriesView(this::showMangaDetailView));
     }
 
     private void showMangaDetailView(Manga manga) {
         contentArea.getChildren().clear();
 
-        // Determine the appropriate back callback based on navigation source
         Runnable backCallback = (currentNavigationSource == NavigationSource.LIBRARY)
                 ? this::showLibraryView
                 : this::showAddSeriesView;
 
         MangaDetailView mangaDetailView = new MangaDetailView(
-                chapter -> showMangaReaderView(chapter, manga), // Pass manga to reader
+                chapter -> showMangaReaderView(chapter, manga),
                 backCallback);
 
-        // Set up "Add to Library" button action
         mangaDetailView.getAddToLibraryButton().setOnAction(e -> {
             LibraryService libraryService = new LibraryServiceImpl();
 
-            // Check if already in library
             if (libraryService.isInLibrary(manga.getId())) {
-                // Already in library - just show message
                 mangaDetailView.getAddToLibraryButton().setText("Already in Library");
                 mangaDetailView.getAddToLibraryButton().setStyle(
                         "-fx-font-size: 14px; " +
@@ -158,16 +136,13 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
                 return;
             }
 
-            // Add to library
             boolean success = libraryService.addToLibrary(manga);
 
             if (success) {
-                // Refresh library if currently showing
                 if (currentLibraryView != null) {
                     currentLibraryView.refreshLibrary();
                 }
 
-                // Update button to show success
                 mangaDetailView.getAddToLibraryButton().setText("Added to Library!");
                 mangaDetailView.getAddToLibraryButton().setDisable(true);
                 mangaDetailView.getAddToLibraryButton().setStyle(
@@ -177,7 +152,6 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
                                 "-fx-padding: 10 20; " +
                                 "-fx-background-radius: 5;");
 
-                // After 2 seconds, update to "In Library" state
                 new Thread(() -> {
                     try {
                         Thread.sleep(2000);
@@ -194,11 +168,10 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
                         });
                     } catch (InterruptedException ex) {
                         System.err.println("Thread interrupted while updating button: " + ex.getMessage());
-                        Thread.currentThread().interrupt(); // Restore interrupted status
+                        Thread.currentThread().interrupt();
                     }
                 }).start();
             } else {
-                // Show error message
                 mangaDetailView.getAddToLibraryButton().setText("Failed to Add");
                 mangaDetailView.getAddToLibraryButton().setStyle(
                         "-fx-font-size: 14px; " +
@@ -216,11 +189,8 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     private void showMangaReaderView(Chapter chapter, Manga manga) {
         contentArea.getChildren().clear();
         MangaReaderView mangaReaderView = new MangaReaderView(() -> {
-            // Go back to the manga detail view and refresh reading progress
             showMangaDetailView(manga);
-            // Refresh the reading progress after returning from reader
             Platform.runLater(() -> {
-                // Find the MangaDetailView in the content area and refresh it
                 contentArea.getChildren().stream()
                         .filter(node -> node instanceof MangaDetailView)
                         .findFirst()
@@ -228,14 +198,11 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
             });
         });
 
-        // Set manga ID for progress tracking
         mangaReaderView.setMangaId(manga.getId());
 
-        // Get all chapters for navigation
         MangaService mangaService = new DefaultMangaServiceImpl();
         List<Chapter> allChapters = mangaService.getChapters(manga.getId());
 
-        // Set chapter list for navigation
         mangaReaderView.setChapterList(allChapters, chapter);
 
         mangaReaderView.loadChapter(chapter);
@@ -255,10 +222,8 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     }
 
     private void updateSidebarSelection(String itemName) {
-        // Set flag to prevent listener from triggering
         programmaticSelection = true;
 
-        // Find and select the appropriate tree item
         TreeView<String> navigationTree = sidebar.getNavigationTree();
         TreeItem<String> root = navigationTree.getRoot();
 
@@ -269,17 +234,14 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
             }
         }
 
-        // Reset flag
         programmaticSelection = false;
     }
 
     @Override
     public void onThemeChanged(ThemeManager.Theme newTheme) {
-        // Update the main view background
         String backgroundColor = themeManager.getBackgroundColor();
         setBackground(new Background(new BackgroundFill(Color.web(backgroundColor), null, null)));
 
-        // Update toolbar styling
         if (topBar != null) {
             updateToolbarTheme();
         }

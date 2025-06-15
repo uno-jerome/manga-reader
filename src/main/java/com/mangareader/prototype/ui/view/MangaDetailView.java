@@ -1,5 +1,6 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.view;
 
+import com.mangareader.prototype.ui.component.ThemeManager;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,14 +10,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import com.mangareader.prototype.model.Chapter;
 import com.mangareader.prototype.model.Manga;
 import com.mangareader.prototype.service.LibraryService;
 import com.mangareader.prototype.service.MangaService;
 import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
 import com.mangareader.prototype.service.impl.LibraryServiceImpl;
-
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;

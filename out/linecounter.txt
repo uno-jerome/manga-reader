@@ -1058,3 +1058,146 @@ target\classes\styles\main.css, code is 353, comment is 31, blank is 77.
 target\maven-status\maven-compiler-plugin\compile\default-compile\createdFiles.lst, code is 33, comment is 0, blank is 0.
 target\maven-status\maven-compiler-plugin\compile\default-compile\inputFiles.lst, code is 23, comment is 0, blank is 0.
 ===============================================================================
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2025-06-16 01:02:38
+count workspace : d:\Downloads\houdoku\houdoku\manga-reader
+total files : 119
+total code lines : 7981
+total comment lines : 1143
+total blank lines : 1629
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |           .css|           1574|            134|            342|     20|
+   |           .xml|            229|              5|              8|    2.9|
+   |          .json|              1|              0|              0|  0.013|
+   |            .md|            221|             12|             71|    2.8|
+   |          .java|           5876|            992|           1198|     74|
+   |           .lst|             31|              0|              0|   0.39|
+   |               |             47|              0|             10|   0.59|
+   |         .java~|              2|              0|              0|  0.025|
+   -------------------------------------------------------------------------
+.github\instructions\custom instructions.instructions.md, code is 40, comment is 0, blank is 7.
+.gitignore, code is 25, comment is 0, blank is 6.
+.idea\.gitignore, code is 5, comment is 0, blank is 0.
+.idea\compiler.xml, code is 13, comment is 0, blank is 0.
+.idea\encodings.xml, code is 7, comment is 0, blank is 0.
+.idea\jarRepositories.xml, code is 20, comment is 0, blank is 0.
+.idea\misc.xml, code is 12, comment is 0, blank is 0.
+.idea\vcs.xml, code is 6, comment is 0, blank is 0.
+.idea\workspace.xml, code is 87, comment is 0, blank is 0.
+cache\images\0498f0712a0c7a21bf4e2e78a4b6fe1f.jpg, it is a binary file.
+cache\images\1253fa36881378cab60a8f05c567a98e.jpg, it is a binary file.
+cache\images\12ddde53ffb5f19ea75dd0a47902c970.jpg, it is a binary file.
+cache\images\179a10658f5a3e1baf5e6c217432373b.jpg, it is a binary file.
+cache\images\1e1e171e7ca85a3e65b12341b65f12cc.jpg, it is a binary file.
+cache\images\2316f7e4ddd071a11da9c02f96cd8506.jpg, it is a binary file.
+cache\images\2543d9e6f57450d6918cc69388c1c0f5.jpg, it is a binary file.
+cache\images\31749dbc6c08d95d6cd8849bbba610c3.jpg, it is a binary file.
+cache\images\443f1e14037e87d3265919c4c6cea4af.jpg, it is a binary file.
+cache\images\459e8b3036a7f1a34d9aa05208104120.jpg, it is a binary file.
+cache\images\45a9fab36e08ba04bcb97d2779d34ab8.jpg, it is a binary file.
+cache\images\461cb031c385b295e80abc17fc9e68df.jpg, it is a binary file.
+cache\images\4a5cd7483efe1d3bde50e34bb173b88c.jpg, it is a binary file.
+cache\images\4cccc0b912be6dce0926a6fcb7ae59c3.jpg, it is a binary file.
+cache\images\4d7af260cbcf71ec78dc151fc18c4b7e.jpg, it is a binary file.
+cache\images\4ec63e164fb1b045a50792d73e5fc1da.jpg, it is a binary file.
+cache\images\53748354a95767aa857f429f3c8963dd.jpg, it is a binary file.
+cache\images\53c354ade7795dfcc0c54295dccd0ff0.jpg, it is a binary file.
+cache\images\5590ff079458b5d0d20f34d647de91bc.jpg, it is a binary file.
+cache\images\5644cb22df03227738e420ec472c7837.jpg, it is a binary file.
+cache\images\6788067ed3eb8acb4f52e66febe9d183.jpg, it is a binary file.
+cache\images\6800399dc73a73f11c3a9005680d305b.jpg, it is a binary file.
+cache\images\76c95786c1898dc388de600a93a06536.jpg, it is a binary file.
+cache\images\779ddb79d2d82ebc63a4c687dc80f101.jpg, it is a binary file.
+cache\images\8076f9da6fe2899849b1f4446e2ab82f.jpg, it is a binary file.
+cache\images\96aee2e8e1f91966471e1279fccfaf59.jpg, it is a binary file.
+cache\images\97eace1fcffc7541d432a76e40d457e4.jpg, it is a binary file.
+cache\images\9c9c5a66fb6cd12d05d2d9727db44854.jpg, it is a binary file.
+cache\images\bdf04ff8da855505e36a64ac225e1c32.jpg, it is a binary file.
+cache\images\c9d3819d041490dfe084374c6ae06165.jpg, it is a binary file.
+cache\images\cca6c1c2f09e5d291a4a4d950d3b8d68.jpg, it is a binary file.
+cache\images\ce0b468fd2ebbc46bc3f9ade02797ce6.jpg, it is a binary file.
+cache\images\d0e2a695f722d526a973a0d32bfe0132.jpg, it is a binary file.
+cache\images\d63fb28d262a6a105903f2db2e786d86.jpg, it is a binary file.
+cache\images\dab5be692181f8b92cbfde264e747cd7.jpg, it is a binary file.
+cache\images\de5b7d4e0067d1d0b4aa392102f6853f.jpg, it is a binary file.
+cache\images\e019e25b3387de66cd380c156a0f6cde.jpg, it is a binary file.
+cache\images\e09612b09260250eadc3727246a999ec.jpg, it is a binary file.
+cache\images\eab4d89cc768b17fd9fcc44bf2ab455f.jpg, it is a binary file.
+cache\images\f7ee4b9a69db8ffe991f625853717b10.jpg, it is a binary file.
+cache\images\f8cece2e82353a88b824d15ced90caee.jpg, it is a binary file.
+cache\images\fd132bb6f9fc2d5670e9322fa01a3f24.jpg, it is a binary file.
+data\library.json, code is 1, comment is 0, blank is 0.
+LICENSE, code is 17, comment is 0, blank is 4.
+pom.xml, code is 84, comment is 5, blank is 8.
+README.md, code is 181, comment is 12, blank is 64.
+src\main\java\com\mangareader\prototype\MangaReaderApplication.java, code is 21, comment is 4, blank is 8.
+src\main\java\com\mangareader\prototype\model\Chapter.java, code is 80, comment is 3, blank is 23.
+src\main\java\com\mangareader\prototype\model\Manga.java, code is 95, comment is 0, blank is 27.
+src\main\java\com\mangareader\prototype\model\SearchParams.java, code is 99, comment is 5, blank is 25.
+src\main\java\com\mangareader\prototype\model\SearchResult.java, code is 60, comment is 4, blank is 15.
+src\main\java\com\mangareader\prototype\service\impl\DefaultMangaServiceImpl.java, code is 7, comment is 0, blank is 2.
+src\main\java\com\mangareader\prototype\service\impl\LibraryServiceImpl.java, code is 340, comment is 20, blank is 67.
+src\main\java\com\mangareader\prototype\service\impl\MangaServiceImpl.java, code is 140, comment is 7, blank is 21.
+src\main\java\com\mangareader\prototype\service\LibraryService.java, code is 101, comment is 109, blank is 39.
+src\main\java\com\mangareader\prototype\service\MangaService.java, code is 19, comment is 0, blank is 14.
+src\main\java\com\mangareader\prototype\source\impl\MangaDexSource.java, code is 515, comment is 47, blank is 65.
+src\main\java\com\mangareader\prototype\source\MangaSource.java, code is 19, comment is 12, blank is 12.
+src\main\java\com\mangareader\prototype\ui\component\Sidebar.java, code is 91, comment is 17, blank is 28.
+src\main\java\com\mangareader\prototype\ui\component\ThemeManager.java, code is 138, comment is 30, blank is 31.
+src\main\java\com\mangareader\prototype\ui\dialog\AddSeriesModal.java, code is 546, comment is 142, blank is 96.
+src\main\java\com\mangareader\prototype\ui\view\.LCKMangaDetailView.java~, code is 1, comment is 0, blank is 0.
+src\main\java\com\mangareader\prototype\ui\view\AddSeriesView.java, code is 785, comment is 118, blank is 132.
+src\main\java\com\mangareader\prototype\ui\view\LibraryView.java, code is 469, comment is 46, blank is 91.
+src\main\java\com\mangareader\prototype\ui\view\MainView.java, code is 204, comment is 7, blank is 49.
+src\main\java\com\mangareader\prototype\ui\view\MangaDetailView.java, code is 1014, comment is 181, blank is 226.
+src\main\java\com\mangareader\prototype\ui\view\MangaReaderView.java, code is 669, comment is 154, blank is 138.
+src\main\java\com\mangareader\prototype\ui\view\SettingsView.java, code is 191, comment is 33, blank is 47.
+src\main\java\com\mangareader\prototype\util\ImageCache.java, code is 242, comment is 53, blank is 40.
+src\main\java\module-info.java, code is 31, comment is 0, blank is 2.
+src\main\resources\styles\dark.css, code is 388, comment is 35, blank is 85.
+src\main\resources\styles\main.css, code is 399, comment is 32, blank is 86.
+target\classes\com\mangareader\prototype\MangaReaderApplication.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\Chapter.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\Manga.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\SearchParams.class, it is a binary file.
+target\classes\com\mangareader\prototype\model\SearchResult.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\DefaultMangaServiceImpl.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\LibraryServiceImpl$LibraryEntry.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\LibraryServiceImpl.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\impl\MangaServiceImpl.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\LibraryService$LibraryEntryInfo.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\LibraryService$LibraryStats.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\LibraryService$ReadingPosition.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\LibraryService.class, it is a binary file.
+target\classes\com\mangareader\prototype\service\MangaService.class, it is a binary file.
+target\classes\com\mangareader\prototype\source\impl\MangaDexSource.class, it is a binary file.
+target\classes\com\mangareader\prototype\source\MangaSource.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\component\Sidebar.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\component\ThemeManager$Theme.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\component\ThemeManager$ThemeChangeListener.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\component\ThemeManager.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\dialog\AddSeriesModal.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\.LCKMangaDetailView.java~, code is 1, comment is 0, blank is 0.
+target\classes\com\mangareader\prototype\ui\view\AddSeriesView$1.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\AddSeriesView$2.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\AddSeriesView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\LibraryView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\MainView$NavigationSource.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\MainView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\MangaDetailView$1.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\MangaDetailView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\MangaReaderView.class, it is a binary file.
+target\classes\com\mangareader\prototype\ui\view\SettingsView.class, it is a binary file.
+target\classes\com\mangareader\prototype\util\ImageCache.class, it is a binary file.
+target\classes\module-info.class, it is a binary file.
+target\classes\styles\dark.css, code is 388, comment is 35, blank is 85.
+target\classes\styles\main.css, code is 399, comment is 32, blank is 86.
+target\maven-status\maven-compiler-plugin\compile\default-compile\createdFiles.lst, code is 0, comment is 0, blank is 0.
+target\maven-status\maven-compiler-plugin\compile\default-compile\inputFiles.lst, code is 31, comment is 0, blank is 0.
+===============================================================================

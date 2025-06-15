@@ -1,4 +1,4 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +17,8 @@ import com.mangareader.prototype.model.SearchParams;
 import com.mangareader.prototype.model.SearchResult;
 import com.mangareader.prototype.source.MangaSource;
 import com.mangareader.prototype.source.impl.MangaDexSource;
+import com.mangareader.prototype.ui.component.ThemeManager;
+import com.mangareader.prototype.ui.dialog.AddSeriesModal;
 import com.mangareader.prototype.util.ImageCache;
 
 import javafx.application.Platform;
@@ -121,7 +123,7 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
             // Auto-load content if MangaDex is selected by default
             MangaSource firstSource = sources.get(0);
             if ("mangadex".equals(firstSource.getId())) {
-                Platform.runLater(() -> autoLoadMangaDxContent());
+                Platform.runLater(() -> autoLoadMangaDexContent());
             }
         }
 
@@ -147,7 +149,7 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
                         performAdvancedSearch();
                     } else if ("mangadex".equals(newVal.getId())) {
                         // Auto-load popular content for MangaDex when no search query
-                        autoLoadMangaDxContent();
+                        autoLoadMangaDexContent();
                     }
                 }
             }
@@ -298,7 +300,7 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
         Platform.runLater(() -> {
             MangaSource selectedSource = sourceSelector.getValue();
             if (selectedSource != null && "mangadex".equals(selectedSource.getId())) {
-                autoLoadMangaDxContent();
+                autoLoadMangaDexContent();
             }
         });
     }
@@ -559,18 +561,15 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
             return;
         }
 
-        // Calculate starting position based on current page and items per page
-        int startIndex = (currentPage - 1) * itemsPerPage;
-        int endIndex = Math.min(startIndex + itemsPerPage, mangaList.size());
-
         // Create a list to store covers that need to be loaded
         List<Runnable> coverLoadTasks = new ArrayList<>();
 
-        // Add covers to grid
+        // Add covers to grid - no need for pagination slicing since API already returns
+        // paginated results
         int gridRow = 0;
         int gridCol = 0;
 
-        for (int i = startIndex; i < endIndex; i++) {
+        for (int i = 0; i < mangaList.size(); i++) {
             final int index = i;
             Manga manga = mangaList.get(i);
             String mangaId = manga.getId();
@@ -638,14 +637,8 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
         // Create a set of manga IDs that should be kept in cache
         Set<String> visibleMangaIds;
         if (currentResults != null && !currentResults.isEmpty()) {
-            int startIndex = (currentPage - 1) * itemsPerPage;
-            int endIndex = Math.min(startIndex + itemsPerPage, currentResults.size());
-
-            // Keep the current page and the next/previous page in cache
-            startIndex = Math.max(0, startIndex - itemsPerPage);
-            endIndex = Math.min(currentResults.size(), endIndex + itemsPerPage);
-
-            visibleMangaIds = currentResults.subList(startIndex, endIndex).stream()
+            // Keep all current results in cache since they represent the current page
+            visibleMangaIds = currentResults.stream()
                     .map(Manga::getId)
                     .collect(Collectors.toSet());
         } else {
@@ -808,7 +801,7 @@ public class AddSeriesView extends VBox implements ThemeManager.ThemeChangeListe
     /**
      * Automatically load popular content for MangaDex source
      */
-    private void autoLoadMangaDxContent() {
+    private void autoLoadMangaDexContent() {
         MangaSource selectedSource = sourceSelector.getValue();
         if (selectedSource == null || !"mangadex".equals(selectedSource.getId())) {
             return;

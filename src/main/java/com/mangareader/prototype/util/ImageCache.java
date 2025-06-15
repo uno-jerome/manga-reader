@@ -1,6 +1,5 @@
 package com.mangareader.prototype.util;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -20,6 +19,9 @@ import javafx.scene.image.Image;
 /**
  * Image cache utility to prevent reloading covers when theme changes
  * Supports both memory and disk caching for better performance
+ * THIS COULD BE MODIFY IF YOU DONT WANT TO CACHE IMAGES (IT IS BETTER TO KEEP
+ * THEM FOR UPCOMING PRESENTATION)
+ * IN MEMORY OR DISK, BUT IT IS HIGHLY RECOMMENDED TO KEEP IT
  */
 public class ImageCache {
     private static final ImageCache instance = new ImageCache();

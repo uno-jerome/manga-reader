@@ -1,4 +1,4 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +120,7 @@ public class ThemeManager {
     private void saveTheme() {
         try {
             preferences.put(THEME_PREFERENCE_KEY, currentTheme.getName());
-            preferences.flush(); // Ensure immediate persistence
+            preferences.flush();
             System.out.println("Saved theme to preferences: " + currentTheme.getName());
         } catch (Exception e) {
             System.err.println("Error saving theme preferences: " + e.getMessage());
@@ -132,17 +132,14 @@ public class ThemeManager {
             return;
         }
 
-        // Clear existing stylesheets
         scene.getStylesheets().clear();
 
-        // Add the theme stylesheet
         try {
             String cssPath = getClass().getResource(theme.getCssPath()).toExternalForm();
             scene.getStylesheets().add(cssPath);
             System.out.println("Applied theme: " + theme.getName() + " (" + cssPath + ")");
         } catch (Exception e) {
             System.err.println("Error loading theme CSS: " + e.getMessage());
-            // Fallback to default theme
             if (theme != Theme.LIGHT) {
                 try {
                     String defaultCssPath = getClass().getResource(Theme.LIGHT.getCssPath()).toExternalForm();
@@ -153,7 +150,6 @@ public class ThemeManager {
             }
         }
 
-        // Force refresh of all UI components by triggering a pseudo-class change
         refreshUIComponents();
     }
 
@@ -162,8 +158,6 @@ public class ThemeManager {
      */
     private void refreshUIComponents() {
         if (scene != null && scene.getRoot() != null) {
-            // Trigger a style refresh by temporarily modifying and restoring the scene
-            // root's style
             scene.getRoot().applyCss();
         }
     }

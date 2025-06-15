@@ -1,4 +1,4 @@
-package com.mangareader.prototype.ui;
+package com.mangareader.prototype.ui.view;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import com.mangareader.prototype.model.Manga;
 import com.mangareader.prototype.service.LibraryService;
 import com.mangareader.prototype.service.impl.LibraryServiceImpl;
+import com.mangareader.prototype.ui.component.ThemeManager;
 import com.mangareader.prototype.util.ImageCache;
 
 import javafx.application.Platform;
