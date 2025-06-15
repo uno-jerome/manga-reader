@@ -253,9 +253,37 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
+    public boolean isChapterRead(String mangaId, String chapterId) {
+        LibraryEntry entry = library.get(mangaId);
+        return entry != null && entry.isChapterRead(chapterId);
+    }
+
+    @Override
     public double getReadingProgress(String mangaId) {
         LibraryEntry entry = library.get(mangaId);
         return entry != null ? entry.getProgressPercentage() : 0.0;
+    }
+
+    @Override
+    public void updateTotalChapters(String mangaId, int totalChapters) {
+        LibraryEntry entry = library.get(mangaId);
+        if (entry != null) {
+            entry.setTotalChapters(totalChapters);
+            saveLibrary();
+            System.out.println("Updated total chapters for " + entry.getManga().getTitle() + ": " + totalChapters);
+        }
+    }
+
+    @Override
+    public Optional<LibraryEntryInfo> getLibraryEntryInfo(String mangaId) {
+        LibraryEntry entry = library.get(mangaId);
+        if (entry != null) {
+            return Optional.of(new LibraryEntryInfo(
+                    entry.getChaptersRead(),
+                    entry.getTotalChapters(),
+                    entry.getReadingStatus()));
+        }
+        return Optional.empty();
     }
 
     /**

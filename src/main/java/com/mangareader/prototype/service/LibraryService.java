@@ -87,6 +87,31 @@ public interface LibraryService {
     void markChapterAsRead(String mangaId, String chapterId);
 
     /**
+     * Check if a specific chapter has been read
+     * 
+     * @param mangaId   The ID of the manga
+     * @param chapterId The ID of the chapter
+     * @return true if the chapter has been read, false otherwise
+     */
+    boolean isChapterRead(String mangaId, String chapterId);
+
+    /**
+     * Update the total chapter count for a manga in the library
+     * 
+     * @param mangaId       The ID of the manga
+     * @param totalChapters The total number of chapters
+     */
+    void updateTotalChapters(String mangaId, int totalChapters);
+
+    /**
+     * Get detailed library entry information for progress display
+     * 
+     * @param mangaId The ID of the manga
+     * @return LibraryEntryInfo containing detailed progress information
+     */
+    Optional<LibraryEntryInfo> getLibraryEntryInfo(String mangaId);
+
+    /**
      * Get reading progress percentage for a manga
      * 
      * @param mangaId The ID of the manga
@@ -188,6 +213,37 @@ public interface LibraryService {
 
         public double getChapterProgress() {
             return totalPages > 0 ? (double) pageNumber / totalPages : 0.0;
+        }
+    }
+
+    /**
+     * Library entry information for detailed progress display
+     */
+    class LibraryEntryInfo {
+        private final int chaptersRead;
+        private final int totalChapters;
+        private final String readingStatus;
+
+        public LibraryEntryInfo(int chaptersRead, int totalChapters, String readingStatus) {
+            this.chaptersRead = chaptersRead;
+            this.totalChapters = totalChapters;
+            this.readingStatus = readingStatus;
+        }
+
+        public int getChaptersRead() {
+            return chaptersRead;
+        }
+
+        public int getTotalChapters() {
+            return totalChapters;
+        }
+
+        public String getReadingStatus() {
+            return readingStatus;
+        }
+
+        public double getProgressPercentage() {
+            return totalChapters > 0 ? (double) chaptersRead / totalChapters : 0.0;
         }
     }
 }

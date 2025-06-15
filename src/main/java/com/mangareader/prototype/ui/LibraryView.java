@@ -267,29 +267,54 @@ public class LibraryView extends BorderPane implements ThemeManager.ThemeChangeL
             double progress = libraryService.getReadingProgress(manga.getId());
             Optional<LibraryService.ReadingPosition> position = libraryService.getReadingPosition(manga.getId());
 
-            // Get library entry to access detailed progress info
-            Optional<Manga> libraryManga = libraryService.getLibraryManga(manga.getId());
-            if (libraryManga.isPresent()) {
-                // Note: We'd need to expose LibraryEntry data through the service interface
-                // For now, let's show basic progress
-                if (progress > 0) {
-                    int progressPercent = (int) (progress * 100);
-                    progressText = String.format("Progress: %d%%", progressPercent);
-                    readingStatusText = "Reading";
+            // Get detailed library entry info for better progress display
+            Optional<LibraryService.LibraryEntryInfo> entryInfo = libraryService.getLibraryEntryInfo(manga.getId());
 
-                    if (progress >= 1.0) {
-                        readingStatusText = "Completed";
-                        progressText = "Completed";
+            if (entryInfo.isPresent()) {
+                LibraryService.LibraryEntryInfo info = entryInfo.get();
+                int chaptersRead = info.getChaptersRead();
+                int totalChapters = info.getTotalChapters();
+
+                if (totalChapters > 0) {
+                    progressText = String.format("%d/%d chapters", chaptersRead, totalChapters);
+
+                    if (chaptersRead > 0) {
+                        readingStatusText = "Reading";
+
+                        // Show current reading position within the current chapter
+                        if (position.isPresent()) {
+                            LibraryService.ReadingPosition pos = position.get();
+                            int currentPage = pos.getPageNumber() + 1;
+                            int totalPages = pos.getTotalPages();
+
+                            if (totalPages > 0) {
+                                // Calculate percentage completed in current chapter
+
+                                // Show which chapter you're currently reading and remaining percentage
+                                progressText += String.format(" (Chapter %d)",
+                                        chaptersRead + 1);
+                            }
+
+                            if (chaptersRead >= totalChapters) {
+                                readingStatusText = "Completed";
+                                progressText = "Completed (" + totalChapters + " chapters)";
+                            }
+                        }
+                    } else {
+                        progressText = "0 chapters available";
                     }
-                }
-            }
+                } else {
+                    // Fallback for basic progress display
+                    if (progress > 0) {
+                        int progressPercent = (int) (progress * 100);
+                        progressText = String.format("Progress: %d%%", progressPercent);
+                        readingStatusText = "Reading";
 
-            // Show current reading position if available
-            if (position.isPresent()) {
-                LibraryService.ReadingPosition pos = position.get();
-                if (pos.getChapterProgress() > 0) {
-                    int chapterPercent = (int) (pos.getChapterProgress() * 100);
-                    progressText += String.format(" (Ch: %d%%)", chapterPercent);
+                        if (progress >= 1.0) {
+                            readingStatusText = "Completed";
+                            progressText = "Completed";
+                        }
+                    }
                 }
             }
         } catch (Exception e) {

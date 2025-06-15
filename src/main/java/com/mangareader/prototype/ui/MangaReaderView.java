@@ -1,11 +1,14 @@
 package com.mangareader.prototype.ui;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.mangareader.prototype.model.Chapter;
+import com.mangareader.prototype.model.Manga;
 import com.mangareader.prototype.service.LibraryService;
 import com.mangareader.prototype.service.MangaService;
 import com.mangareader.prototype.service.impl.DefaultMangaServiceImpl;
@@ -29,6 +32,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class MangaReaderView extends BorderPane {
+    // Zoom memory - stores zoom levels per manga
+    private static final Map<String, Double> MANGA_ZOOM_LEVELS = new HashMap<>();
+
     private final StackPane imageContainer;
     private final ScrollPane webtoonScrollPane;
     private final VBox webtoonContainer;
@@ -87,6 +93,13 @@ public class MangaReaderView extends BorderPane {
         webtoonScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         webtoonScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         webtoonScrollPane.setPannable(true); // Allow panning/dragging
+
+        // Add scroll listener for webtoon progress tracking
+        webtoonScrollPane.vvalueProperty().addListener((obs, oldVal, newVal) -> {
+            if (isWebtoonMode && currentMangaId != null && currentChapter != null) {
+                saveWebtoonScrollPosition(newVal.doubleValue());
+            }
+        });
 
         // Current page image view (for traditional mode)
         currentImageView = new ImageView();
@@ -148,13 +161,38 @@ public class MangaReaderView extends BorderPane {
         nextChapterButton.setDisable(true);
         nextChapterButton.setOnAction(e -> nextChapter());
 
-        // Zoom slider
-        zoomSlider = new Slider(0.1, 3.0, 1.0);
+        // Zoom slider with conservative limits to ensure controls always remain
+        // accessible
+        zoomSlider = new Slider(0.3, 1.8, 1.0);
         zoomSlider.setShowTickLabels(true);
         zoomSlider.setShowTickMarks(true);
         zoomSlider.setPrefWidth(200);
+        zoomSlider.setMajorTickUnit(0.3);
+        zoomSlider.setMinorTickCount(2);
+        zoomSlider.setSnapToTicks(false);
         zoomSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            zoomLevel = newVal.doubleValue();
+            // Validate zoom level to ensure controls remain accessible with stricter limits
+            double newZoom = newVal.doubleValue();
+
+            // Clamp zoom level to more conservative bounds for better navigation control
+            if (newZoom < 0.3) { // Slightly increased minimum for better readability
+                newZoom = 0.3;
+            }
+            if (newZoom > 1.8) { // Slightly reduced maximum to ensure controls always remain accessible
+                newZoom = 1.8;
+            }
+
+            final double finalZoom = newZoom;
+            zoomLevel = finalZoom;
+
+            // Update slider if value was clamped
+            if (Math.abs(finalZoom - newVal.doubleValue()) > 0.01) {
+                Platform.runLater(() -> zoomSlider.setValue(finalZoom));
+            }
+
+            // Save zoom level for current manga
+            saveZoomLevel();
+
             if (isWebtoonMode) {
                 updateWebtoonImageSizes();
             } else {
@@ -176,12 +214,17 @@ public class MangaReaderView extends BorderPane {
         Label zoomLabel = new Label("Zoom:");
         zoomLabel.setStyle("-fx-text-fill: white;");
 
-        // Controls container - make it more visible
+        // Controls container - make it always visible and sticky at bottom
         controlsBox = new HBox(15);
         controlsBox.setAlignment(Pos.CENTER);
         controlsBox.setPadding(new Insets(15));
         controlsBox.setStyle(
-                "-fx-background-color: rgba(0, 0, 0, 0.8); -fx-border-color: #444; -fx-border-width: 1 0 0 0;");
+                "-fx-background-color: rgba(0, 0, 0, 0.9); -fx-border-color: #444; -fx-border-width: 1 0 0 0;");
+
+        // Ensure controls always stay visible - set minimum height and make it sticky
+        controlsBox.setMinHeight(80);
+        controlsBox.setMaxHeight(80);
+
         controlsBox.getChildren().addAll(
                 backButton,
                 new Label("   "), // Spacer
@@ -280,9 +323,24 @@ public class MangaReaderView extends BorderPane {
                             containerWidth = getScene() != null ? getScene().getWidth() - 250 : 800;
                         }
 
-                        // Set the image to use most of the available width, applying zoom level
+                        // Set the image to use most of the available width, applying zoom level with
+                        // stricter limits
                         double baseWidth = Math.max(600, containerWidth * 0.85);
                         double targetWidth = baseWidth * zoomLevel;
+
+                        // Prevent excessive zoom that could make navigation impossible - stricter
+                        // limits
+                        double maxAllowedWidth = containerWidth * 2.0; // Reduced from 2.5 for better control
+                        if (targetWidth > maxAllowedWidth) {
+                            targetWidth = maxAllowedWidth;
+                        }
+
+                        // Also ensure minimum width for readability
+                        double minAllowedWidth = containerWidth * 0.3;
+                        if (targetWidth < minAllowedWidth) {
+                            targetWidth = minAllowedWidth;
+                        }
+
                         pageImageView.setFitWidth(targetWidth);
 
                         // Create image with better error handling for JPEG corruption
@@ -348,15 +406,24 @@ public class MangaReaderView extends BorderPane {
             restoreReadingPosition();
         }
 
-        // Auto-detect reading mode based on chapter format
+        // Auto-detect reading mode based on chapter format OR manga genres
+        boolean shouldUseWebtoonMode = false;
+
+        // First check chapter's reading format
         if (chapter.getReadingFormat() != null && "webtoon".equals(chapter.getReadingFormat())) {
-            if (!isWebtoonMode) {
-                toggleReadingMode();
-            }
+            shouldUseWebtoonMode = true;
         } else {
-            if (isWebtoonMode) {
-                toggleReadingMode();
+            // Auto-detect based on manga genres if we have manga ID
+            if (currentMangaId != null) {
+                shouldUseWebtoonMode = detectWebtoonFromGenres();
             }
+        }
+
+        // Apply the detected mode
+        if (shouldUseWebtoonMode && !isWebtoonMode) {
+            toggleReadingMode();
+        } else if (!shouldUseWebtoonMode && isWebtoonMode) {
+            toggleReadingMode();
         }
 
         progressIndicator.setVisible(true);
@@ -391,6 +458,38 @@ public class MangaReaderView extends BorderPane {
                 });
             }
         });
+    }
+
+    /**
+     * Detect if manga should use webtoon mode based on genres
+     */
+    private boolean detectWebtoonFromGenres() {
+        try {
+            // Get manga details to check genres
+            Optional<Manga> mangaOpt = mangaService.getMangaDetails(currentMangaId);
+            if (mangaOpt.isPresent()) {
+                Manga manga = mangaOpt.get();
+                List<String> genres = manga.getGenres();
+
+                if (genres != null) {
+                    // Check for webtoon-related genres (case-insensitive)
+                    for (String genre : genres) {
+                        String lowerGenre = genre.toLowerCase();
+                        if (lowerGenre.contains("webtoon") ||
+                                lowerGenre.contains("long strip") ||
+                                lowerGenre.contains("web comic") ||
+                                lowerGenre.contains("manhwa") ||
+                                lowerGenre.contains("manhua")) {
+                            System.out.println("Auto-detected webtoon format based on genre: " + genre);
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error detecting webtoon format from genres: " + e.getMessage());
+        }
+        return false;
     }
 
     private void displayCurrentPage() {
@@ -452,12 +551,13 @@ public class MangaReaderView extends BorderPane {
         if (availableWidth <= 0 || availableHeight <= 0) {
             // Fallback to reasonable defaults based on scene size
             availableWidth = getScene() != null ? getScene().getWidth() - 40 : 800;
-            availableHeight = getScene() != null ? getScene().getHeight() - 100 : 600;
+            availableHeight = getScene() != null ? getScene().getHeight() - 150 : 600; // Reserve more space for
+                                                                                       // controls
         }
 
-        // Account for padding and controls
+        // Account for padding and controls - ensure controls always remain visible
         availableWidth -= 40; // Account for padding
-        availableHeight -= 80; // Account for controls and padding
+        availableHeight -= 150; // Reserve sufficient space for bottom controls (increased from 120)
 
         // Get image dimensions
         Image image = currentImageView.getImage();
@@ -470,10 +570,28 @@ public class MangaReaderView extends BorderPane {
         // Calculate scale factor to fit image in available space
         double scaleX = availableWidth / imageWidth;
         double scaleY = availableHeight / imageHeight;
-        double scale = Math.min(scaleX, scaleY) * zoomLevel;
+        double baseScale = Math.min(scaleX, scaleY);
+        double scale = baseScale * zoomLevel;
 
         // Ensure minimum readable size
         scale = Math.max(scale, 0.1);
+
+        // Strict maximum limits to ensure navigation controls always remain accessible
+        // The image should never exceed the available container space significantly
+        double maxAllowedWidth = availableWidth * 1.2; // Reduced from 1.5 for stricter control
+        double maxAllowedHeight = availableHeight * 1.2;
+
+        double scaledWidth = imageWidth * scale;
+        double scaledHeight = imageHeight * scale;
+
+        // Enforce strict limits - if zoom would make image too large, reduce scale
+        if (scaledWidth > maxAllowedWidth) {
+            scale = maxAllowedWidth / imageWidth;
+            scaledHeight = imageHeight * scale; // Recalculate height
+        }
+        if (scaledHeight > maxAllowedHeight) {
+            scale = Math.min(scale, maxAllowedHeight / imageHeight);
+        }
 
         // Set the size
         currentImageView.setFitWidth(imageWidth * scale);
@@ -490,15 +608,30 @@ public class MangaReaderView extends BorderPane {
             containerWidth = getScene() != null ? getScene().getWidth() - 250 : 800;
         }
 
-        // Set the image to use most of the available width, applying zoom level
+        // Set the image to use most of the available width, applying zoom level with
+        // stricter limits
         double baseWidth = Math.max(600, containerWidth * 0.85);
         double targetWidth = baseWidth * zoomLevel;
 
+        // Prevent excessive zoom that could make navigation impossible - stricter
+        // limits
+        double maxAllowedWidth = containerWidth * 2.0; // Reduced from 2.5 for better control
+        if (targetWidth > maxAllowedWidth) {
+            targetWidth = maxAllowedWidth;
+        }
+
+        // Also ensure minimum width for readability
+        double minAllowedWidth = containerWidth * 0.3;
+        if (targetWidth < minAllowedWidth) {
+            targetWidth = minAllowedWidth;
+        }
+
         // Update all webtoon images
+        final double finalTargetWidth = targetWidth;
         webtoonContainer.getChildren().forEach(node -> {
             if (node instanceof ImageView) {
                 ImageView imageView = (ImageView) node;
-                imageView.setFitWidth(targetWidth);
+                imageView.setFitWidth(finalTargetWidth);
             }
         });
     }
@@ -536,10 +669,12 @@ public class MangaReaderView extends BorderPane {
             nextPage();
             event.consume();
         } else if (code == KeyCode.PLUS || code == KeyCode.EQUALS) {
-            zoomSlider.setValue(Math.min(3.0, zoomSlider.getValue() + 0.1));
+            // Respect the new zoom limits (max 1.8x)
+            zoomSlider.setValue(Math.min(1.8, zoomSlider.getValue() + 0.1));
             event.consume();
         } else if (code == KeyCode.MINUS) {
-            zoomSlider.setValue(Math.max(0.1, zoomSlider.getValue() - 0.1));
+            // Respect the new zoom limits (min 0.3x)
+            zoomSlider.setValue(Math.max(0.3, zoomSlider.getValue() - 0.1));
             event.consume();
         } else if (code == KeyCode.DIGIT0) {
             zoomSlider.setValue(1.0); // Reset zoom
@@ -634,6 +769,30 @@ public class MangaReaderView extends BorderPane {
      */
     public void setMangaId(String mangaId) {
         this.currentMangaId = mangaId;
+
+        // Restore zoom level for this manga
+        restoreZoomLevel();
+    }
+
+    /**
+     * Save zoom level for current manga
+     */
+    private void saveZoomLevel() {
+        if (currentMangaId != null) {
+            MANGA_ZOOM_LEVELS.put(currentMangaId, zoomLevel);
+        }
+    }
+
+    /**
+     * Restore zoom level for current manga
+     */
+    private void restoreZoomLevel() {
+        if (currentMangaId != null && MANGA_ZOOM_LEVELS.containsKey(currentMangaId)) {
+            double savedZoom = MANGA_ZOOM_LEVELS.get(currentMangaId);
+            // Set zoom level and update slider
+            zoomLevel = savedZoom;
+            Platform.runLater(() -> zoomSlider.setValue(savedZoom));
+        }
     }
 
     /**
@@ -668,10 +827,49 @@ public class MangaReaderView extends BorderPane {
                 LibraryService.ReadingPosition pos = position.get();
                 // Only restore if it's the same chapter
                 if (currentChapter.getId().equals(pos.getChapterId())) {
-                    currentPageIndex = Math.max(0, pos.getPageNumber());
-                    System.out.println("Restored reading position: page " + (currentPageIndex + 1));
+                    if (isWebtoonMode) {
+                        // For webtoon mode, restore scroll position
+                        int totalPages = pageUrls != null ? pageUrls.size() : 1;
+                        double scrollProgress = totalPages > 1 ? (double) pos.getPageNumber() / (totalPages - 1) : 0.0;
+                        Platform.runLater(() -> {
+                            webtoonScrollPane.setVvalue(Math.max(0.0, Math.min(1.0, scrollProgress)));
+                        });
+                        System.out.println("Restored webtoon scroll position: " + (scrollProgress * 100) + "%");
+                    } else {
+                        // For traditional mode, restore page index
+                        currentPageIndex = Math.max(0, pos.getPageNumber());
+                        System.out.println("Restored reading position: page " + (currentPageIndex + 1));
+                    }
                 }
             }
+        }
+    }
+
+    /**
+     * Save webtoon scroll position for progress tracking
+     */
+    private void saveWebtoonScrollPosition(double scrollValue) {
+        if (currentMangaId != null && currentChapter != null &&
+                libraryService.isInLibrary(currentMangaId) && isWebtoonMode) {
+
+            // Calculate progress based on scroll position
+            // scrollValue ranges from 0.0 (top) to 1.0 (bottom)
+            double progress = scrollValue;
+
+            // Mark as completed if scrolled to near the bottom (95%)
+            if (progress >= 0.95) {
+                libraryService.markChapterAsRead(currentMangaId, currentChapter.getId());
+            }
+
+            // Save the scroll position as progress
+            int totalPages = pageUrls != null ? pageUrls.size() : 0;
+            int simulatedPageIndex = (int) (progress * Math.max(1, totalPages - 1));
+
+            libraryService.updateReadingPosition(
+                    currentMangaId,
+                    currentChapter.getId(),
+                    simulatedPageIndex,
+                    totalPages);
         }
     }
 

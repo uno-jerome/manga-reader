@@ -32,6 +32,13 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     private LibraryView currentLibraryView; // Track current library view for refreshing
     private boolean programmaticSelection = false; // Flag to prevent listener loops
 
+    // Track navigation source for proper back navigation
+    private enum NavigationSource {
+        ADD_SERIES, LIBRARY
+    }
+
+    private NavigationSource currentNavigationSource = NavigationSource.ADD_SERIES;
+
     public MainView() {
         // Initialize theme manager
         themeManager = ThemeManager.getInstance();
@@ -84,11 +91,22 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
         // Update sidebar selection to "Library"
         updateSidebarSelection("Library");
 
+        // Set navigation source
+        currentNavigationSource = NavigationSource.LIBRARY;
+
         contentArea.getChildren().clear();
-        currentLibraryView = new LibraryView(this::showMangaDetailView);
+        currentLibraryView = new LibraryView(this::showMangaDetailViewFromLibrary);
         // Set up the "Add New Series" button to navigate to AddSeriesView
         currentLibraryView.setOnAddSeriesCallback(this::showAddSeriesView);
         contentArea.getChildren().add(currentLibraryView);
+    }
+
+    /**
+     * Show manga detail view when navigating from library
+     */
+    private void showMangaDetailViewFromLibrary(Manga manga) {
+        currentNavigationSource = NavigationSource.LIBRARY;
+        showMangaDetailView(manga);
     }
 
     private void showSettingsView() {
@@ -103,6 +121,9 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
         // Update sidebar selection to "Add Series"
         updateSidebarSelection("Add Series");
 
+        // Set navigation source
+        currentNavigationSource = NavigationSource.ADD_SERIES;
+
         contentArea.getChildren().clear();
         // Pass a callback to AddSeriesView to handle manga selection
         contentArea.getChildren().add(new AddSeriesView(this::showMangaDetailView));
@@ -110,9 +131,15 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
 
     private void showMangaDetailView(Manga manga) {
         contentArea.getChildren().clear();
+
+        // Determine the appropriate back callback based on navigation source
+        Runnable backCallback = (currentNavigationSource == NavigationSource.LIBRARY)
+                ? this::showLibraryView
+                : this::showAddSeriesView;
+
         MangaDetailView mangaDetailView = new MangaDetailView(
                 chapter -> showMangaReaderView(chapter, manga), // Pass manga to reader
-                this::showAddSeriesView);
+                backCallback);
 
         // Set up "Add to Library" button action
         mangaDetailView.getAddToLibraryButton().setOnAction(e -> {
@@ -120,6 +147,7 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
 
             // Check if already in library
             if (libraryService.isInLibrary(manga.getId())) {
+                // Already in library - just show message
                 mangaDetailView.getAddToLibraryButton().setText("Already in Library");
                 mangaDetailView.getAddToLibraryButton().setStyle(
                         "-fx-font-size: 14px; " +
@@ -139,7 +167,7 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
                     currentLibraryView.refreshLibrary();
                 }
 
-                // Show confirmation message
+                // Update button to show success
                 mangaDetailView.getAddToLibraryButton().setText("Added to Library!");
                 mangaDetailView.getAddToLibraryButton().setDisable(true);
                 mangaDetailView.getAddToLibraryButton().setStyle(
@@ -149,19 +177,20 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
                                 "-fx-padding: 10 20; " +
                                 "-fx-background-radius: 5;");
 
-                // Reset after 2 seconds
+                // After 2 seconds, update to "In Library" state
                 new Thread(() -> {
                     try {
                         Thread.sleep(2000);
                         Platform.runLater(() -> {
                             mangaDetailView.getAddToLibraryButton().setText("In Library");
-                            mangaDetailView.getAddToLibraryButton().setDisable(false);
+                            mangaDetailView.getAddToLibraryButton().setDisable(true);
                             mangaDetailView.getAddToLibraryButton().setStyle(
                                     "-fx-font-size: 14px; " +
                                             "-fx-background-color: #28a745; " +
                                             "-fx-text-fill: white; " +
                                             "-fx-padding: 10 20; " +
-                                            "-fx-background-radius: 5;");
+                                            "-fx-background-radius: 5; " +
+                                            "-fx-opacity: 0.8;");
                         });
                     } catch (InterruptedException ex) {
                         System.err.println("Thread interrupted while updating button: " + ex.getMessage());
@@ -187,8 +216,16 @@ public class MainView extends BorderPane implements ThemeManager.ThemeChangeList
     private void showMangaReaderView(Chapter chapter, Manga manga) {
         contentArea.getChildren().clear();
         MangaReaderView mangaReaderView = new MangaReaderView(() -> {
-            // Go back to the manga detail view
+            // Go back to the manga detail view and refresh reading progress
             showMangaDetailView(manga);
+            // Refresh the reading progress after returning from reader
+            Platform.runLater(() -> {
+                // Find the MangaDetailView in the content area and refresh it
+                contentArea.getChildren().stream()
+                        .filter(node -> node instanceof MangaDetailView)
+                        .findFirst()
+                        .ifPresent(node -> ((MangaDetailView) node).refreshReadingProgress());
+            });
         });
 
         // Set manga ID for progress tracking
